@@ -1,0 +1,79 @@
+{% load static %}
+<nav class="bg-white shadow">
+  <div class="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8">
+    <div class="flex h-16 justify-between">
+      <div class="flex px-2 lg:px-0">
+        <div class="flex flex-shrink-0 items-center">
+          <img class="h-10 w-auto" src="{% static 'movies/film.png' %}" alt="logo">
+        </div>
+        <div class="hidden lg:ml-6 lg:flex lg:space-x-8">
+          <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
+          <a href="/" class="inline-flex items-center border-b-2
+                        {% if request.path == '/' %}
+                        border-sky-600 
+                        {% else %} 
+                        border-transparent
+                        {% endif %}
+                        px-1 
+                        pt-1 text-sm font-medium text-blue-900">My Movies</a>
+        {% if user.is_authenticated %}
+          <a href="/collections" class="inline-flex items-center border-b-2 
+                        {% if request.path == '/collections/' %}
+                        border-sky-600 
+                        {% else %} 
+                        border-transparent
+                        {% endif %}
+
+                        px-1
+                        pt-1 text-sm font-medium text-gray-500 hover:border-gray-300
+                        hover:text-gray-700">Mis Peliculas</a>
+
+        {% endif %}
+        </div>
+      </div>
+      <div class="flex flex-1 items-center justify-center px-2 lg:ml-6 lg:justify-end">
+        <div class="w-full max-w-lg lg:max-w-xs">
+        <form method="get" action="/artworks/search" class="mb-3">
+          <label for="search" class="sr-only">Buscar</label>
+          <div class="relative">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <input id="search" name="search" class="block w-full rounded-md border-0 bg-white py-1.5 pl-10 pr-3 text-gray-900
+                            ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2
+                            focus:ring-inset focus:ring-indigo-600 
+                            sm:text-sm sm:leading-6" placeholder="Buscar" type="search" 
+                        {% if search_value != None %} 
+                            value="{{ search_value|stringformat:'s' }}"
+                        {% endif %} >
+
+          </div>
+       </form>
+        </div>
+      </div>
+      <div class="hidden lg:ml-4 lg:flex lg:items-center">
+
+
+    {% if user.is_authenticated %}
+        <div class="relative ml-4 flex-shrink-0">
+          <a href="#" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500"> Hola, {{user.username}} </a>
+        </div>
+        <div class="relative ml-4 flex-shrink-0">
+          <a href="/users/logout" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-sky-700">Termina Sesión</a>
+        </div>
+    {% else %}
+        <div class="relative ml-4 flex-shrink-0">
+          <a href="/accounts/register/" class="inline-flex items-center
+                        px-1 pt-1 text-sm font-medium text-sky-700"> Regístrate </a>
+        </div>
+        <div class="relative ml-4 flex-shrink-0">
+          <a href="/users/login" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-sky-700">Inicia Sesión</a>
+        </div>
+    {% endif %}
+      </div>
+    </div>
+  </div>
+
+</nav>

@@ -1,0 +1,32 @@
+{% extends "movies/base.html" %}
+
+{% block content %}
+
+<div class="container mx-auto px-5 py-2 lg:px-32 lg:pt-12">
+  <div id="artworks-container" class="-m-1 flex flex-wrap md:-m-2">
+    {% for movie in movies %}  
+    <div class="flex w-1/4 flex-wrap pt-3">
+      <div class="w-full p-1 md:p-2">
+        <img
+          class="block h-full w-full rounded-lg object-cover object-center"
+          src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/{{movie.poster_path}}" alt="{{movie.title}}" />
+      </div>
+      <div  class=" -m-1 h-10 mt-1 mb-5 "> 
+                <a href="/movies/{{movie.id}}" class="block overflow-hidden
+                    text-ellipsis pl-5 text-sky-600 font-bold"> {{movie.title|truncatechars_html:40}}  </a>
+                <a href="#"  class="block pl-5"> 
+                    <span class="text-gray-400 text-sm font-thin"> {{movie.release_date}} </span> </a>
+      </div>
+    </div>
+    {% endfor %} 
+  </div>
+  <button class="flex w-48 mt-10 justify-center mx-auto rounded-md
+        bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white
+        shadow-sm hover:bg-indigo-500 focus-visible:outline
+        focus-visible:outline-2 focus-visible:outline-offset-2 
+        focus-visible:outline-indigo-600"
+        hx-get="/movies/random" hx-target="#artworks-container" hx-swap="beforeend"
+    >Get More Movies</button>
+
+</div>
+{% endblock content %}

@@ -1,0 +1,41 @@
+<div id="modal" _="on closeModal or listChanged remove me" 
+    class="relative z-10" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 hidden bg-gray-500 bg-opacity-75 transition-opacity md:block"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+
+<div class="flex w-full mx-auto transform 
+            text-left text-base transition 
+            md:my-8 md:max-w-2xl md:px-4 lg:max-w-4xl">
+         
+        <div class="relative flex w-full 
+                items-center overflow-hidden bg-white 
+                px-4 pb-8 pt-14 shadow-2xl sm:px-6 sm:pt-8 md:p-6 lg:p-8">
+          
+        <form hx-post="/movies/movie_review/add/{{movie.id}}/" hx-target="#modal" hx-swap="outerHTML" 
+            class="bg-white  w-full  md:col-span-2">
+            <div class="px-4 py-3 sm:p-8">
+                <p class="block overflow-hidden
+                        text-ellipsis mb-4 dark:text-gray-200 text-xl font-bold"> Agrega una Reseña  </p>
+             <div class="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                   <div class="sm:col-span-4">
+                            {{movie_review_form}}
+                          
+                            <div class="text-sm font-medium text-red-600">
+                                {{ form.description.errors }}
+                            </div>
+                </div>
+            </div>
+         <div class="mt-6 mr-3 flex items-center justify-end gap-x-6">
+            <button type="button"  
+                    _="on click trigger closeModal" 
+                    class="text-sm font-semibold leading-6 text-gray-900">Cancelar</button>
+            <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Guardar</button>
+          </div>
+        </form>
+
+
+            </div>
+        </div>
+    </div>
+        </div>
+</div>
