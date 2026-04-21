@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from movies.models import Movie, MovieReview, MovieComment
 from movies.forms import MovieReviewForm, MovieCommentForm
+from django.db.models import Q
+from movies.models import Movie, Genre
 
 def all_movies(request):
     movies= Movie.objects.all()
@@ -10,9 +12,42 @@ def all_movies(request):
 
 # Create your views here.
 def index(request):
+    # 1. Atrapamos los filtros que vienen del Header (Buscador y Barra Lateral)
+    query = request.GET.get('search', '')
+    genre_filter = request.GET.get('genre', '')
+    sort_by = request.GET.get('sort', '-release_date') # Por defecto las más recientes
+
+    # 2. Empezamos trayendo todas las películas
     movies = Movie.objects.all()
-    context = { 'movies':movies, 'message':'welcome' }
-    return render(request,'movies/index.html', context=context )
+
+    # 3. Si el usuario escribió en el buscador, filtramos por título
+    if query:
+        movies = movies.filter(Q(title__icontains=query))
+
+    # 4. Si el usuario seleccionó un género en la barra lateral, filtramos por género
+    if genre_filter:
+        movies = movies.filter(genres__name=genre_filter)
+
+    # 5. Aplicamos el ordenamiento seleccionado
+    valid_sorts = ['-release_date', 'release_date', 'title', '-title', '-revenue']
+    if sort_by in valid_sorts:
+        movies = movies.order_by(sort_by)
+    else:
+        movies = movies.order_by('-release_date')
+
+    # 6. Calculamos la mitad exacta para el botón de "Mostrar Más" en index.html
+    total_movies = movies.count()
+    half_count = (total_movies + 1) // 2 
+
+    # 7. Enviamos las variables al contexto para que el HTML sepa qué mostrar seleccionado
+    context = {
+        'movies': movies,
+        'half_count': half_count,
+        'search_value': query,           # Mantiene el texto en el buscador
+        'selected_genre': genre_filter,  # Mantiene el género seleccionado en el menú
+        'selected_sort': sort_by,        # Mantiene el orden seleccionado en el menú
+    }
+    return render(request, 'movies/index.html', context)
     
 def movie(request, movie_id):
     movie = Movie.objects.get(id=movie_id)

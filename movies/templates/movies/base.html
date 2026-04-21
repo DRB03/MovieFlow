@@ -1,70 +1,101 @@
 {% load static %}
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="utf-8">  
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>MOVIEFLOW</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Lora:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet">
 
     <link href="{% static 'output.css' %}" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'media', 
+        theme: {
+          extend: {
+            colors: {
+              bg: '#14181c',
+              surface: '#1f2b38',
+              bordercol: 'rgba(255,255,255,0.08)',
+              accent: '#00e054', /* Verde neón */
+              muted: 'rgba(255,255,255,0.4)',
+              textcol: '#ffffff',
+            },
+            fontFamily: {
+              sans: ['Syne', 'sans-serif'], 
+              serif: ['Lora', 'serif'],     
+              mono: ['IBM Plex Mono', 'monospace'], 
+            }
+          }
+        }
+      }
+    </script>
+
+    <script>
+      /* Fix para evitar el parpadeo en Firefox (FOUC) */
+      let FF_FOUC_FIX;
+    </script>
+
     {% block head %}
-
     {% endblock head %}
-    <title> My Movies </title>
 
-      <script>
-      /*to prevent Firefox FOUC, this must be here*/
-        let FF_FOUC_FIX;
-      </script>
-     {% block style %}
-     <style>
-
-     </style>
-     {% endblock style %}
+    {% block style %}
+    <style>
+        body { 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex-grow: 1;
+        }
+    </style>
+    {% endblock style %}
   </head>
 
-  <body class="bg-white dark:bg-slate-900" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <body class="bg-gray-50 text-gray-900 dark:bg-bg dark:text-textcol transition-colors duration-300" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    
     {% block header %}
-      {% include "movies/header.html" %} 
+      {% include "movies/header.html" %}
     {% endblock header %}
 
+    <main>
+      {% block content %}
+      {% endblock content %}
+    </main>
 
-    {% block content %}
-
-
-
-    {% endblock content %}
-
-   
-
-
-    {% block footer%}
-<footer class="bg-white">
-  <div class="mx-auto max-w-7xl overflow-hidden px-6 py-20 sm:py-24 lg:px-8">
-    <nav class="-mb-6 columns-2 sm:flex sm:justify-center sm:space-x-12" aria-label="Footer">
-      <div class="pb-6">
-        <a href="https://github.com/DRB03/ProgramacionWebhttps://github.com/DRB03/ProgramacionWeb" class="text-sm leading-6 text-gray-600 hover:text-gray-900">About</a>
+    {% block footer %}
+    <footer class="bg-white dark:bg-[#0f1215] border-t border-gray-200 dark:border-bordercol transition-colors mt-12">
+      <div class="mx-auto max-w-7xl overflow-hidden px-6 py-12 lg:px-8">
+        
+        <nav class="-mb-6 columns-2 sm:flex sm:justify-center sm:space-x-12" aria-label="Footer">
+          <div class="pb-6">
+            <a href="https://github.com/DRB03/MovieFlow" target="_blank" class="font-mono text-xs tracking-widest uppercase text-gray-600 dark:text-muted hover:text-green-600 dark:hover:text-accent transition-colors">
+              Acerca del Proyecto
+            </a>
+          </div>
+          <div class="pb-6">
+      
+          </div>
+        </nav>
+        
+        <p class="mt-10 text-center font-mono text-[0.7rem] leading-5 text-gray-500 dark:text-muted uppercase tracking-widest">
+          &copy; 2026 Desarrollado por el equipo de MovieFlow.
+        </p>
+        
       </div>
-      <div class="pb-6">
-        <a href="https://github.com/DRB03" class="text-sm leading-6 text-gray-600 hover:text-gray-900">GitHub</a>
-      </div>
-      <div class="pb-6">
-        <a href="https://www.wikiart.org/" class="text-sm leading-6 text-gray-600 hover:text-gray-900"> wikiart.org </a>
-      </div>
-    </nav>
-   
-    <p class="mt-10 text-center text-xs leading-5 text-gray-500">&copy; 2026 Daniel Romero Bravo</p>
-  </div>
-</footer>
-
+    </footer>
     {% endblock footer %}
 
-  <script src="https://unpkg.com/hyperscript.org@0.9.7"></script>
-  <script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.7"></script>
+    <script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous"></script>
 
-  {% block scripts %}
+    {% block scripts %}
+    {% endblock scripts %}
 
-  {% endblock scripts %}
-
-</body>
+  </body>
 </html>
