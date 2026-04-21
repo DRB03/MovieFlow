@@ -1,79 +1,199 @@
 {% load static %}
-<nav class="bg-white shadow">
-  <div class="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8">
-    <div class="flex h-16 justify-between">
-      <div class="flex px-2 lg:px-0">
-        <div class="flex flex-shrink-0 items-center">
-          <img class="h-10 w-auto" src="{% static 'movies/film.png' %}" alt="logo">
-        </div>
-        <div class="hidden lg:ml-6 lg:flex lg:space-x-8">
-          <!-- Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
-          <a href="/" class="inline-flex items-center border-b-2
-                        {% if request.path == '/' %}
-                        border-sky-600 
-                        {% else %} 
-                        border-transparent
-                        {% endif %}
-                        px-1 
-                        pt-1 text-sm font-medium text-blue-900">My Movies</a>
-        {% if user.is_authenticated %}
-          <a href="/collections" class="inline-flex items-center border-b-2 
-                        {% if request.path == '/collections/' %}
-                        border-sky-600 
-                        {% else %} 
-                        border-transparent
-                        {% endif %}
+<form method="GET" action="/">
 
-                        px-1
-                        pt-1 text-sm font-medium text-gray-500 hover:border-gray-300
-                        hover:text-gray-700">Mis Peliculas</a>
+  <header class="bg-white dark:bg-[#0f1215] border-b border-gray-200 dark:border-bordercol sticky top-0 z-40 transition-colors duration-300">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 justify-between items-center">
 
-        {% endif %}
-        </div>
-      </div>
-      <div class="flex flex-1 items-center justify-center px-2 lg:ml-6 lg:justify-end">
-        <div class="w-full max-w-lg lg:max-w-xs">
-        <form method="get" action="/artworks/search" class="mb-3">
-          <label for="search" class="sr-only">Buscar</label>
-          <div class="relative">
-            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            <input id="search" name="search" class="block w-full rounded-md border-0 bg-white py-1.5 pl-10 pr-3 text-gray-900
-                            ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2
-                            focus:ring-inset focus:ring-indigo-600 
-                            sm:text-sm sm:leading-6" placeholder="Buscar" type="search" 
-                        {% if search_value != None %} 
-                            value="{{ search_value|stringformat:'s' }}"
-                        {% endif %} >
+        <div class="flex items-center gap-4">
+          <button type="button" onclick="openSidebar()" class="flex-shrink-0 bg-transparent rounded-sm p-2 text-gray-600 dark:text-muted hover:text-green-600 dark:hover:text-accent hover:bg-gray-100 dark:hover:bg-surface transition-all duration-300 focus:outline-none cursor-pointer">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
 
+          <a href="/" class="flex flex-shrink-0 items-center">
+            <span class="text-2xl font-extrabold tracking-tighter text-gray-900 dark:text-textcol uppercase">
+              MOVIE<span class="text-green-600 dark:text-accent">FLOW</span>
+            </span>
+          </a>
+
+          <div class="hidden lg:flex lg:space-x-8 font-mono text-xs uppercase tracking-widest ml-6">
+            <a href="/" class="inline-flex items-center border-b-2 px-1 pt-1 transition-colors duration-300 {% if request.path == '/' %} border-green-600 dark:border-accent text-gray-900 dark:text-textcol {% else %} border-transparent text-gray-500 hover:text-green-600 dark:hover:text-accent {% endif %}">Catálogo</a>
+            {% if user.is_authenticated %}
+            <a href="/collections" class="inline-flex items-center border-b-2 px-1 pt-1 transition-colors duration-300 {% if request.path == '/collections/' %} border-green-600 dark:border-accent text-gray-900 dark:text-textcol {% else %} border-transparent text-gray-500 hover:text-green-600 dark:hover:text-accent {% endif %}">Mis Películas</a>
+            {% endif %}
           </div>
-       </form>
         </div>
-      </div>
-      <div class="hidden lg:ml-4 lg:flex lg:items-center">
 
+        <div class="flex flex-1 items-center justify-center px-4 lg:px-8 max-w-2xl">
+          
+          <div class="relative w-full group rounded-full p-[2px] overflow-hidden bg-gray-200 dark:bg-surface/50 shadow-sm transition-all duration-300">
+            
+            <div class="absolute inset-[-200%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,transparent_0%,#00e054_50%,transparent_100%)] group-hover:bg-[conic-gradient(from_90deg_at_50%_50%,transparent_0%,#3b82f6_50%,transparent_100%)] group-focus-within:bg-[conic-gradient(from_90deg_at_50%_50%,transparent_0%,#3b82f6_50%,transparent_100%)]"></div>
+            
+            <div class="relative flex items-center w-full bg-gray-100 dark:bg-[#151a21] rounded-full transition-colors duration-300">
+              
+              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <svg class="h-4 w-4 text-gray-400 dark:text-muted group-focus-within:text-blue-500 transition-colors duration-300" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              
+              <input type="text" name="search" value="{{ search_value|default_if_none:'' }}" placeholder="Buscar películas..."
+                     class="block w-full bg-transparent border-none py-2 pl-10 pr-12 text-gray-900 dark:text-textcol font-mono text-sm placeholder-gray-500 dark:placeholder-muted focus:outline-none focus:ring-0">
+              
+              <button type="submit" class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 dark:text-muted hover:text-blue-500 transition-colors duration-300">
+                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                </svg>
+              </button>
 
-    {% if user.is_authenticated %}
-        <div class="relative ml-4 flex-shrink-0">
-          <a href="#" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500"> Hola, {{user.username}} </a>
+            </div>
+          </div>
         </div>
-        <div class="relative ml-4 flex-shrink-0">
-          <a href="/users/logout" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-sky-700">Termina Sesión</a>
+
+        <div class="hidden lg:flex lg:items-center font-mono text-xs tracking-wider uppercase">
+          {% if user.is_authenticated %}
+            <span class="text-gray-600 dark:text-muted mr-4">Hola, <span class="text-gray-900 dark:text-textcol font-bold">{{user.username}}</span></span>
+            <a href="/users/logout" class="text-green-600 dark:text-accent hover:text-gray-900 dark:hover:text-white transition-colors duration-300">Salir</a>
+          {% else %}
+            <a href="/accounts/register/" class="text-gray-900 dark:text-textcol hover:text-green-600 dark:hover:text-accent transition-colors duration-300 mr-4">Regístrate</a>
+            <a href="/users/login" class="text-green-600 dark:text-accent hover:text-gray-900 dark:hover:text-white transition-colors duration-300">Ingresar</a>
+          {% endif %}
         </div>
-    {% else %}
-        <div class="relative ml-4 flex-shrink-0">
-          <a href="/accounts/register/" class="inline-flex items-center
-                        px-1 pt-1 text-sm font-medium text-sky-700"> Regístrate </a>
-        </div>
-        <div class="relative ml-4 flex-shrink-0">
-          <a href="/users/login" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-sky-700">Inicia Sesión</a>
-        </div>
-    {% endif %}
+
       </div>
     </div>
-  </div>
+  </header>
 
-</nav>
+  <div id="sidebar-backdrop" onclick="closeSidebar()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 cursor-pointer"></div>
+
+  <div id="filter-sidebar" class="fixed top-0 left-0 h-full w-80 bg-white dark:bg-[#0f1215] border-r border-gray-200 dark:border-bordercol z-50 transform -translate-x-full transition-transform duration-300 ease-in-out shadow-2xl flex flex-col">
+    
+    <div class="flex items-center justify-between px-6 py-5 border-b border-gray-200 dark:border-bordercol">
+      <span class="font-bold text-lg tracking-tighter text-gray-900 dark:text-textcol uppercase">Filtros</span>
+      <button type="button" onclick="closeSidebar()" class="text-gray-500 hover:text-red-500 dark:text-muted dark:hover:text-red-500 transition-colors focus:outline-none">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+
+    <div class="p-6 overflow-y-auto space-y-8 flex-1">
+      
+      <div>
+        <label class="block font-mono text-[0.65rem] uppercase tracking-widest text-green-600 dark:text-accent mb-4">Género Cinematográfico</label>
+        
+        <div class="flex flex-wrap gap-2">
+          <div>
+            <input type="radio" name="genre" id="gen-all" value="" class="peer hidden" onchange="this.form.submit()" {% if not selected_genre %}checked{% endif %}>
+            <label for="gen-all" class="block px-3 py-1.5 rounded-full border border-gray-300 dark:border-bordercol font-mono text-[0.7rem] uppercase tracking-wider cursor-pointer transition-all duration-300 bg-gray-50 dark:bg-surface text-gray-600 dark:text-muted hover:border-green-600 dark:hover:border-accent hover:text-green-600 dark:hover:text-accent hover:-translate-y-1 hover:shadow-md peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 peer-checked:dark:text-black">
+              Todos
+            </label>
+          </div>
+
+          <div>
+            <input type="radio" name="genre" id="gen-Action" value="Action" class="peer hidden" onchange="this.form.submit()" {% if selected_genre == 'Action' %}checked{% endif %}>
+            <label for="gen-Action" class="block px-3 py-1.5 rounded-full border border-gray-300 dark:border-bordercol font-mono text-[0.7rem] uppercase tracking-wider cursor-pointer transition-all duration-300 bg-gray-50 dark:bg-surface text-gray-600 dark:text-muted hover:border-green-600 dark:hover:border-accent hover:text-green-600 dark:hover:text-accent hover:-translate-y-1 hover:shadow-md peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 peer-checked:dark:text-black">
+              Acción
+            </label>
+          </div>
+
+          <div>
+            <input type="radio" name="genre" id="gen-Adventure" value="Adventure" class="peer hidden" onchange="this.form.submit()" {% if selected_genre == 'Adventure' %}checked{% endif %}>
+            <label for="gen-Adventure" class="block px-3 py-1.5 rounded-full border border-gray-300 dark:border-bordercol font-mono text-[0.7rem] uppercase tracking-wider cursor-pointer transition-all duration-300 bg-gray-50 dark:bg-surface text-gray-600 dark:text-muted hover:border-green-600 dark:hover:border-accent hover:text-green-600 dark:hover:text-accent hover:-translate-y-1 hover:shadow-md peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 peer-checked:dark:text-black">
+              Aventura
+            </label>
+          </div>
+
+          <div>
+            <input type="radio" name="genre" id="gen-Comedy" value="Comedy" class="peer hidden" onchange="this.form.submit()" {% if selected_genre == 'Comedy' %}checked{% endif %}>
+            <label for="gen-Comedy" class="block px-3 py-1.5 rounded-full border border-gray-300 dark:border-bordercol font-mono text-[0.7rem] uppercase tracking-wider cursor-pointer transition-all duration-300 bg-gray-50 dark:bg-surface text-gray-600 dark:text-muted hover:border-green-600 dark:hover:border-accent hover:text-green-600 dark:hover:text-accent hover:-translate-y-1 hover:shadow-md peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 peer-checked:dark:text-black">
+              Comedia
+            </label>
+          </div>
+
+          <div>
+            <input type="radio" name="genre" id="gen-Drama" value="Drama" class="peer hidden" onchange="this.form.submit()" {% if selected_genre == 'Drama' %}checked{% endif %}>
+            <label for="gen-Drama" class="block px-3 py-1.5 rounded-full border border-gray-300 dark:border-bordercol font-mono text-[0.7rem] uppercase tracking-wider cursor-pointer transition-all duration-300 bg-gray-50 dark:bg-surface text-gray-600 dark:text-muted hover:border-green-600 dark:hover:border-accent hover:text-green-600 dark:hover:text-accent hover:-translate-y-1 hover:shadow-md peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 peer-checked:dark:text-black">
+              Drama
+            </label>
+          </div>
+
+          <div>
+            <input type="radio" name="genre" id="gen-Romance" value="Romance" class="peer hidden" onchange="this.form.submit()" {% if selected_genre == 'Romance' %}checked{% endif %}>
+            <label for="gen-Romance" class="block px-3 py-1.5 rounded-full border border-gray-300 dark:border-bordercol font-mono text-[0.7rem] uppercase tracking-wider cursor-pointer transition-all duration-300 bg-gray-50 dark:bg-surface text-gray-600 dark:text-muted hover:border-green-600 dark:hover:border-accent hover:text-green-600 dark:hover:text-accent hover:-translate-y-1 hover:shadow-md peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 peer-checked:dark:text-black">
+              Romance
+            </label>
+          </div>
+
+          <div>
+            <input type="radio" name="genre" id="gen-ScienceFiction" value="Science Fiction" class="peer hidden" onchange="this.form.submit()" {% if selected_genre == 'Science Fiction' %}checked{% endif %}>
+            <label for="gen-ScienceFiction" class="block px-3 py-1.5 rounded-full border border-gray-300 dark:border-bordercol font-mono text-[0.7rem] uppercase tracking-wider cursor-pointer transition-all duration-300 bg-gray-50 dark:bg-surface text-gray-600 dark:text-muted hover:border-green-600 dark:hover:border-accent hover:text-green-600 dark:hover:text-accent hover:-translate-y-1 hover:shadow-md peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 peer-checked:dark:text-black">
+              Sci-Fi
+            </label>
+          </div>
+
+          <div>
+            <input type="radio" name="genre" id="gen-Thriller" value="Thriller" class="peer hidden" onchange="this.form.submit()" {% if selected_genre == 'Thriller' %}checked{% endif %}>
+            <label for="gen-Thriller" class="block px-3 py-1.5 rounded-full border border-gray-300 dark:border-bordercol font-mono text-[0.7rem] uppercase tracking-wider cursor-pointer transition-all duration-300 bg-gray-50 dark:bg-surface text-gray-600 dark:text-muted hover:border-green-600 dark:hover:border-accent hover:text-green-600 dark:hover:text-accent hover:-translate-y-1 hover:shadow-md peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 peer-checked:dark:text-black">
+              Suspenso
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-mono text-[0.65rem] uppercase tracking-widest text-green-600 dark:text-accent mb-4">Ordenar Catálogo</label>
+        
+        <div class="flex flex-col gap-2">
+          
+          <div>
+            <input type="radio" name="sort" id="sort-new" value="-release_date" class="peer hidden" onchange="this.form.submit()" {% if selected_sort == '-release_date' %}checked{% endif %}>
+            <label for="sort-new" class="flex items-center justify-between px-4 py-3 rounded-md border border-gray-300 dark:border-bordercol font-mono text-[0.75rem] uppercase tracking-widest cursor-pointer transition-all duration-300 bg-gray-50 dark:bg-surface text-gray-600 dark:text-muted hover:border-green-600 dark:hover:border-accent hover:text-green-600 dark:hover:text-accent hover:-translate-y-1 hover:shadow-md peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 peer-checked:dark:text-black">
+              <span>Más recientes</span>
+              <span class="opacity-0 peer-checked:opacity-100 transition-opacity">&check;</span>
+            </label>
+          </div>
+
+          <div>
+            <input type="radio" name="sort" id="sort-pop" value="-revenue" class="peer hidden" onchange="this.form.submit()" {% if selected_sort == '-revenue' %}checked{% endif %}>
+            <label for="sort-pop" class="flex items-center justify-between px-4 py-3 rounded-md border border-gray-300 dark:border-bordercol font-mono text-[0.75rem] uppercase tracking-widest cursor-pointer transition-all duration-300 bg-gray-50 dark:bg-surface text-gray-600 dark:text-muted hover:border-green-600 dark:hover:border-accent hover:text-green-600 dark:hover:text-accent hover:-translate-y-1 hover:shadow-md peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 peer-checked:dark:text-black">
+              <span>Más Populares</span>
+              <span class="opacity-0 peer-checked:opacity-100 transition-opacity">&check;</span>
+            </label>
+          </div>
+
+          <div>
+            <input type="radio" name="sort" id="sort-az" value="title" class="peer hidden" onchange="this.form.submit()" {% if selected_sort == 'title' %}checked{% endif %}>
+            <label for="sort-az" class="flex items-center justify-between px-4 py-3 rounded-md border border-gray-300 dark:border-bordercol font-mono text-[0.75rem] uppercase tracking-widest cursor-pointer transition-all duration-300 bg-gray-50 dark:bg-surface text-gray-600 dark:text-muted hover:border-green-600 dark:hover:border-accent hover:text-green-600 dark:hover:text-accent hover:-translate-y-1 hover:shadow-md peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 peer-checked:dark:text-black">
+              <span>Alfabético (A - Z)</span>
+              <span class="opacity-0 peer-checked:opacity-100 transition-opacity">&check;</span>
+            </label>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</form>
+
+<script>
+  const sidebar = document.getElementById('filter-sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+
+  function openSidebar() {
+    backdrop.classList.remove('hidden');
+    setTimeout(() => { backdrop.classList.remove('opacity-0'); backdrop.classList.add('opacity-100'); }, 10);
+    sidebar.classList.remove('-translate-x-full');
+    sidebar.classList.add('translate-x-0');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('translate-x-0');
+    sidebar.classList.add('-translate-x-full');
+    backdrop.classList.remove('opacity-100');
+    backdrop.classList.add('opacity-0');
+    setTimeout(() => { backdrop.classList.add('hidden'); }, 300);
+  }
+</script>
