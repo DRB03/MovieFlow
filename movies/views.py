@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from movies.models import Movie, MovieReview, MovieComment
 from movies.forms import MovieReviewForm, MovieCommentForm
-from django.db.models import Q
+from django.db.models import Q, Avg, Count
 from movies.models import Movie, Genre
 
 def all_movies(request):
@@ -52,7 +52,14 @@ def index(request):
 def movie(request, movie_id):
     movie = Movie.objects.get(id=movie_id)
     review_form = MovieReviewForm()
-    context = { 'movie':movie, 'saludo':'welcome', 'review_form':review_form }
+    review_stats = movie.moviereview_set.aggregate(avg_rating=Avg('rating'), total_reviews=Count('id'))
+    context = {
+        'movie': movie,
+        'saludo': 'welcome',
+        'review_form': review_form,
+        'avg_user_score': review_stats['avg_rating'],
+        'total_user_reviews': review_stats['total_reviews'],
+    }
     return render(request,'movies/movie.html', context=context )
 
 def movie_reviews(request, movie_id):
