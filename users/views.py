@@ -1,10 +1,11 @@
 
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.views.decorators.http import require_POST
 from movies.models import MovieReview
 
 @login_required(login_url='/users/login')
@@ -81,3 +82,11 @@ def register_view(request):
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse('index'))
+
+
+@login_required(login_url='/users/login')
+@require_POST
+def delete_review(request, review_id):
+    review = get_object_or_404(MovieReview, id=review_id, user=request.user)
+    review.delete()
+    return HttpResponseRedirect(reverse('profile'))
