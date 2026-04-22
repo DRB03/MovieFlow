@@ -4,7 +4,7 @@
 <main class="container mx-auto px-5 py-8 lg:px-20">
 
   <div class="mb-8 text-center">
-    <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">C O N T E N I D O </h1>
+    <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">C A T A L O G</h1>
   </div>
 
   <div id="artworks-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -28,13 +28,13 @@
         <h3 class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 line-clamp-2"> 
             {{movie.title}}
         </h3>
-        <span class="text-xs text-gray-500 dark:text-gray-400 mt-2 block font-medium"> Ver detalles &rarr; </span>
+        <span class="text-xs text-gray-500 dark:text-gray-400 mt-2 block font-medium"> View details &rarr; </span>
       </div>
     </a>
     
     {% empty %}
     <div class="col-span-full py-10 text-center">
-        <p class="text-gray-600 dark:text-gray-400 text-lg">No hay películas disponibles en el catálogo.</p>
+      <p class="text-gray-600 dark:text-gray-400 text-lg">No movies are currently available in the catalog.</p>
     </div>
     {% endfor %} 
     
@@ -45,7 +45,7 @@
       <button 
         onclick="toggleMovies()" 
         class="flex w-64 justify-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors cursor-pointer">
-        <span id="btn-text">Mostrar más películas</span>
+        <span id="btn-text">Show more movies</span>
       </button>
   </div>
   {% endif %}
@@ -56,19 +56,19 @@
   function toggleMovies() {
       const extraMovies = document.querySelectorAll('.extra-movie');
       const btnText = document.getElementById('btn-text');
-      let estanOcultas = false;
+      let areHidden = false;
 
       extraMovies.forEach(movie => {
           movie.classList.toggle('hidden');
           if (movie.classList.contains('hidden')) {
-              estanOcultas = true;
+          areHidden = true;
           }
       });
 
-      if (estanOcultas) {
-          btnText.innerText = 'Mostrar más películas';
+      if (areHidden) {
+        btnText.innerText = 'Show more movies';
       } else {
-          btnText.innerText = 'Mostrar menos películas';
+        btnText.innerText = 'Show fewer movies';
       }
   }
 </script>

@@ -35,13 +35,13 @@
                   {{review.user}}
                 </a>
               </p>
-              <p class="text-gray-600 dark:text-gray-400">Usuario desde: {{review.user.date_joined|date:"M Y"}}</p>
+              <p class="text-gray-600 dark:text-gray-400">Member since: {{review.user.date_joined|date:"M Y"}}</p>
             </div>
           </div>
 </article> 
 
 {% empty %}
 
-   <p class="text-gray-600 dark:text-gray-400">No hay reseñas todavía</p>
+   <p class="text-gray-600 dark:text-gray-400">No reviews yet</p>
 
 {% endfor %}

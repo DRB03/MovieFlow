@@ -1,108 +1,195 @@
 {% extends "movies/base.html" %}
 
+{% block style %}
+{{ block.super }}
+<style>
+  :root {
+    --accent-blue: #40bcf4;
+  }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .accent-blue {
+    color: var(--accent-blue);
+  }
+
+  .accent-blue-bg {
+    background: var(--accent-blue);
+  }
+
+  .accent-blue-border {
+    border-color: var(--accent-blue);
+  }
+</style>
+{% endblock style %}
+
 {% block content %}
-<div class="container mx-auto px-5 py-2 lg:px-32 lg:pt-8">
-  
-  <div class="mb-4 pl-1 md:pl-2">
-    <a href='/movies/movie_comment/add/{{movie.id}}' class="inline-block text-sky-600 hover:text-sky-800 dark:text-sky-400 font-bold transition-colors"> 
-      + Agrega un comentario 
-    </a>
-  </div>
+<section class="bg-gray-100 dark:bg-[#1a2030] border-b border-gray-200 dark:border-bordercol">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-12">
+    <p class="font-mono text-[0.68rem] uppercase tracking-widest text-gray-500 dark:text-muted mb-6">
+      Movies / Details / <span class="accent-blue">{{ movie.title }}</span>
+    </p>
 
-  <article>
-    <div class="flex flex-wrap lg:flex-nowrap">
-      
-      <div class="overflow-hidden rounded-lg bg-white dark:bg-slate-800 shadow w-full lg:w-1/3 h-full mb-6 lg:mb-0">
-        <div class="px-4 py-5 sm:p-6">
-          <div class="w-full p-1 md:p-2">
-            <img
-              class="block h-full w-full rounded-lg object-cover object-center"
-              src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/{{movie.poster_path}}" alt="{{movie.title}}" />
-          </div>
-        </div>
-        <div class="bg-gray-50 dark:bg-slate-700 px-4 py-4 sm:px-6">
-          <div class="-m-1 h-12 mt-1 mb-5"> 
-            <p class="mt-3 pl-8 text-gray-800 dark:text-gray-300 font-thin"> Data from: </p>
-            <a href="https://www.tmdb.org{{artwork.path}}" class="block overflow-hidden text-ellipsis pl-5 text-sky-600 dark:text-sky-400 pb-5"> 
-              tmdb.org{{artwork.path}}  
-            </a>
-          </div>
+    <div class="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)] gap-8 lg:gap-10 items-start">
+      <div class="w-full max-w-[220px] mx-auto md:mx-0">
+        <div class="overflow-hidden rounded-md border border-gray-200 dark:border-bordercol bg-white dark:bg-surface shadow-sm">
+          <img
+            class="block h-full w-full object-cover"
+            src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/{{movie.poster_path}}"
+            alt="{{ movie.title }} poster"
+            onerror="this.parentElement.classList.add('min-h-[300px]','flex','items-center','justify-center','text-gray-500','dark:text-muted','font-mono','text-xs','uppercase','tracking-wider');this.remove();this.parentElement.innerHTML='Poster unavailable';"
+          />
         </div>
       </div>
 
-      <div class="overflow-hidden w-full lg:w-2/3 h-full lg:pl-10">
-        <div class="px-4 py-4 sm:px-6">
-          <div class="-m-1 mt-1 mb-5"> 
-            
-            <p class="block overflow-hidden text-ellipsis pl-5 text-gray-900 dark:text-gray-100 text-2xl font-bold"> 
-              {{movie.title}} ({{movie.release_date|date:"Y"}}) 
-            </p>
-            
-            <p class="mt-1 pl-5 text-gray-700 dark:text-gray-300 text-sm font-thin"> 
-              {% for g in movie.genres.all %} 
-                {{g}} 
-                {% if not forloop.last %} - {% endif %}
-              {% endfor %}  
-            </p>
-            
-            <div class="flex mt-4 mb-4">
-              {% if user.is_authenticated %}
-              <a class="pl-5 text-blue-600 dark:text-blue-400 hover:text-blue-800 text-sm font-medium"   
-                 hx-get="/movies/movie_review/add/{{movie.id}}" hx-target="body" hx-swap="beforeend" href="#">reviews</a> 
-              {% endif %}
-              <a class="pl-5 text-red-600 dark:text-red-400 hover:text-red-800 text-sm font-medium" href="#">like</a> 
-            </div> 
-            
-            <h1 class="mt-5 text-gray-900 dark:text-gray-100 text-lg pl-5 font-semibold">Overview</h1>
-            <p class="mt-2 pl-5 text-gray-800 dark:text-gray-300 text-sm font-normal font-sans leading-relaxed">
-              {{ movie.overview }}
-            </p>
-            
-            <p class="mt-5 text-gray-900 dark:text-gray-100 text-base pl-5 font-semibold"> Credits: </p>
-            <p class="mt-1 pl-5 text-gray-800 dark:text-gray-300 text-sm font-thin leading-relaxed">
-              {% for c in movie.credits.all %} 
-                {{c}} {% if not forloop.last %} - {% endif %}
-              {% endfor %}  
-            </p> 
-            
-            <p class="block overflow-hidden mt-8 mb-4 text-ellipsis text-gray-900 dark:text-gray-100 text-xl font-bold pl-5"> 
-              Reseñas: 
-            </p>
-            
-            <div class="pl-5" hx-trigger="listChanged from:body" hx-get="{% url 'movie_reviews' movie.id %}" hx-target="this">
-              {% include "movies/reviews.html" %}
-            </div>
+      <div class="min-w-0">
+        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-textcol leading-none">
+          {{ movie.title }}
+        </h1>
 
-            <p class="block overflow-hidden mt-10 mb-4 text-ellipsis text-gray-900 dark:text-gray-100 text-xl font-bold pl-5"> 
-              Comentarios de la Comunidad: 
-            </p>
-            
-            <div class="pl-5">
-              {% for comentario in movie.moviecomment_set.all %}
-              <article class="flex max-w-xl flex-col items-start justify-between pt-4 pb-4 border-b border-gray-200 dark:border-slate-700 last:border-0">
-                <div class="group relative">
-                  <p class="mt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                    "{{comentario.comment_text}}"
-                  </p>
-                </div>
-                <div class="relative mt-2 flex items-center gap-x-3">
-                  <div class="text-sm">
-                    <p class="font-semibold text-sky-600 dark:text-sky-400">
-                      @{{comentario.user.username}}
-                    </p>
-                  </div>
-                </div>
-              </article>
-              {% empty %}
-                <p class="text-gray-600 dark:text-gray-400 py-2">No hay comentarios rápidos todavía. ¡Sé el primero!</p>
-              {% endfor %}
-            </div>
-            
-          </div>
+        <p class="mt-3 font-serif italic text-gray-600 dark:text-muted text-sm sm:text-base">
+          Released in {{ movie.release_date|date:"Y" }}
+        </p>
+
+        <p class="mt-3 font-mono text-[0.72rem] uppercase tracking-wider text-gray-500 dark:text-muted leading-relaxed">
+          {{ movie.running_time }} min
+          {% if movie.genres.all %}
+            &nbsp;·&nbsp;
+            {% for g in movie.genres.all %}
+              {{ g }}{% if not forloop.last %} · {% endif %}
+            {% endfor %}
+          {% endif %}
+        </p>
+
+        <div class="mt-4 inline-flex items-center gap-2 rounded border border-gray-200 dark:border-bordercol bg-white dark:bg-surface px-3 py-1.5">
+          <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">User Score</span>
+          {% if avg_user_score %}
+          <span class="text-sm font-bold accent-blue">{{ avg_user_score|floatformat:1 }}/100</span>
+          <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">({{ total_user_reviews }} reviews)</span>
+          {% else %}
+          <span class="text-sm font-bold text-gray-700 dark:text-gray-200">No ratings yet</span>
+          {% endif %}
+        </div>
+
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+          {% if user.is_authenticated %}
+          <a
+            class="inline-flex items-center rounded border border-gray-300 dark:border-bordercol px-4 py-2 font-mono text-[0.7rem] uppercase tracking-wider text-gray-700 dark:text-gray-200 hover:border-[#40bcf4] hover:text-sky-500 transition-colors"
+            hx-get="/movies/movie_review/add/{{movie.id}}"
+            hx-target="body"
+            hx-swap="beforeend"
+            href="#"
+          >
+            Write a review
+          </a>
+          {% endif %}
+
+          <a
+            href="#"
+            class="inline-flex items-center rounded border border-red-300 dark:border-red-400/40 px-4 py-2 font-mono text-[0.7rem] uppercase tracking-wider text-red-600 dark:text-red-400 hover:border-red-500 hover:text-red-500 transition-colors"
+          >
+            Like
+          </a>
         </div>
       </div>
-      
     </div>
-  </article>
+  </div>
+</section>
+
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-12">
+  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-10 lg:gap-12">
+    <div class="space-y-10">
+      <section>
+        <p class="section-label">Synopsis</p>
+        <p class="font-serif text-base leading-8 text-gray-700 dark:text-gray-300">
+          {{ movie.overview|default:"No synopsis available yet." }}
+        </p>
+      </section>
+
+      <section>
+        <p class="section-label">Cast & Crew</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {% regroup movie.moviecredit_set.all by person as credits_by_person %}
+          {% for group in credits_by_person %}
+          <a
+            href="#"
+            class="rounded border border-gray-200 dark:border-bordercol bg-white dark:bg-surface px-4 py-3 transition-colors hover:border-[#40bcf4] hover:text-sky-500"
+            aria-disabled="true"
+            title="Actor and production pages will be available in a future update"
+          >
+            <p class="font-mono text-[0.6rem] uppercase tracking-widest text-gray-500 dark:text-muted">Credit</p>
+            <p class="mt-1 font-semibold text-sm text-gray-900 dark:text-textcol">{{ group.grouper }}</p>
+          </a>
+          {% empty %}
+          <p class="text-sm text-gray-600 dark:text-gray-400">No credits available for this movie.</p>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section>
+        <p class="section-label">Community Reviews</p>
+        <div hx-trigger="listChanged from:body" hx-get="{% url 'movie_reviews' movie.id %}" hx-target="this">
+          {% include "movies/reviews.html" %}
+        </div>
+      </section>
+
+    </div>
+
+    <aside class="space-y-8">
+      <section>
+        <p class="section-label">Movie Details</p>
+        <div class="rounded border border-gray-200 dark:border-bordercol bg-white dark:bg-surface p-4">
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-4 border-b border-gray-200 dark:border-bordercol pb-3">
+              <span class="font-mono text-[0.65rem] uppercase tracking-widest text-gray-500 dark:text-muted">Release</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-textcol text-right">{{ movie.release_date|date:"F j, Y" }}</span>
+            </div>
+            <div class="flex items-start justify-between gap-4 border-b border-gray-200 dark:border-bordercol pb-3">
+              <span class="font-mono text-[0.65rem] uppercase tracking-widest text-gray-500 dark:text-muted">Runtime</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-textcol text-right">{{ movie.running_time }} minutes</span>
+            </div>
+            <div class="flex items-start justify-between gap-4 border-b border-gray-200 dark:border-bordercol pb-3">
+              <span class="font-mono text-[0.65rem] uppercase tracking-widest text-gray-500 dark:text-muted">Budget</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-textcol text-right">{% if movie.budget %}${{ movie.budget }}{% else %}Unknown{% endif %}</span>
+            </div>
+            <div class="flex items-start justify-between gap-4 border-b border-gray-200 dark:border-bordercol pb-3">
+              <span class="font-mono text-[0.65rem] uppercase tracking-widest text-gray-500 dark:text-muted">Revenue</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-textcol text-right">{% if movie.revenue %}${{ movie.revenue }}{% else %}Unknown{% endif %}</span>
+            </div>
+            <div class="flex items-start justify-between gap-4 border-b border-gray-200 dark:border-bordercol pb-3">
+              <span class="font-mono text-[0.65rem] uppercase tracking-widest text-gray-500 dark:text-muted">Average User Score</span>
+              <span class="text-sm font-semibold text-right accent-blue">
+                {% if avg_user_score %}
+                  {{ avg_user_score|floatformat:1 }}/100
+                {% else %}
+                  No ratings yet
+                {% endif %}
+              </span>
+            </div>
+            <div class="flex items-start justify-between gap-4">
+              <span class="font-mono text-[0.65rem] uppercase tracking-widest text-gray-500 dark:text-muted">Data Source</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-textcol text-right">TMDB</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
 </div>
 {% endblock content %}
