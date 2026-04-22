@@ -1,3 +1,11 @@
+#Custom pull movie ids
+cargar_ids.py
+mis_ids.txt
+
+#dev custom files
+devnotes.md
+start.sh
+
 # Django #
 *.log
 *.pot
