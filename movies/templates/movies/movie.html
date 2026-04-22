@@ -98,6 +98,13 @@
           >
             Write a review
           </a>
+          {% else %}
+          <a
+            class="inline-flex items-center rounded border border-gray-300 dark:border-bordercol px-4 py-2 font-mono text-[0.7rem] uppercase tracking-wider text-gray-700 dark:text-gray-200 hover:border-[#40bcf4] hover:text-sky-500 transition-colors"
+            href="{% url 'login' %}?next={{ request.path|urlencode }}"
+          >
+            Sign in to review
+          </a>
           {% endif %}
 
           <a
