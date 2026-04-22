@@ -4,6 +4,7 @@ from movies.models import Movie, MovieReview, MovieComment
 from movies.forms import MovieReviewForm, MovieCommentForm
 from django.db.models import Q, Avg, Count
 from movies.models import Movie, Genre
+from django.contrib.auth.decorators import login_required
 
 def all_movies(request):
     movies= Movie.objects.all()
@@ -85,6 +86,7 @@ def add_comment(request, movie_id):
                       'movies/movie_comment_form.html',
                         {'form': form, 'movie':movie})
 
+@login_required(login_url='/users/login')
 def add_review(request, movie_id):
     form = None
     movie = Movie.objects.get(id=movie_id)
