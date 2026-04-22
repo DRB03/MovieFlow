@@ -36,6 +36,24 @@
   .accent-blue-border {
     border-color: var(--accent-blue);
   }
+
+  .reco-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(64, 188, 244, 0.45) transparent;
+  }
+
+  .reco-scroll::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .reco-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .reco-scroll::-webkit-scrollbar-thumb {
+    background: rgba(64, 188, 244, 0.35);
+    border-radius: 999px;
+  }
 </style>
 {% endblock style %}
 
@@ -154,6 +172,55 @@
         <div hx-trigger="listChanged from:body" hx-get="{% url 'movie_reviews' movie.id %}" hx-target="this">
           {% include "movies/reviews.html" %}
         </div>
+      </section>
+
+      <section>
+        <p class="section-label">Recommended For You</p>
+        {% if recommendations %}
+        <div class="reco-scroll overflow-x-auto pb-2">
+          <div class="flex gap-4 snap-x snap-mandatory min-w-full">
+            {% for rec in recommendations %}
+            <article class="snap-start shrink-0 w-[78%] sm:w-[48%] lg:w-[31%] rounded border border-gray-200 dark:border-bordercol bg-white dark:bg-surface overflow-hidden">
+              <a href="/movies/{{ rec.movie.id }}/" class="block">
+                <div class="aspect-[2/3] bg-gray-200 dark:bg-[#151b27]">
+                  <img
+                    class="h-full w-full object-cover"
+                    src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/{{ rec.movie.poster_path }}"
+                    alt="{{ rec.movie.title }} poster"
+                    onerror="this.remove();"
+                  />
+                </div>
+              </a>
+              <div class="p-3">
+                <a href="/movies/{{ rec.movie.id }}/" class="block">
+                  <h3 class="font-semibold text-sm text-gray-900 dark:text-textcol leading-snug line-clamp-2 hover:text-sky-500 transition-colors">
+                    {{ rec.movie.title }}
+                  </h3>
+                </a>
+                <p class="mt-2 font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">
+                  {% if rec.avg_rating %}
+                    Avg Rating: <span class="accent-blue font-semibold">{{ rec.avg_rating|floatformat:1 }}/100</span>
+                  {% else %}
+                    Avg Rating: <span class="text-gray-700 dark:text-gray-200 font-semibold">No ratings yet</span>
+                  {% endif %}
+                </p>
+                <p class="mt-2 text-xs text-gray-600 dark:text-gray-300 line-clamp-1">
+                  {% for g in rec.movie.genres.all %}
+                    {{ g.name }}{% if not forloop.last %} · {% endif %}
+                  {% empty %}
+                    Genre unavailable
+                  {% endfor %}
+                </p>
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
+        <div class="rounded border border-gray-200 dark:border-bordercol bg-white dark:bg-surface p-4">
+          <p class="text-sm text-gray-600 dark:text-gray-400">Not enough data yet to generate recommendations for this movie.</p>
+        </div>
+        {% endif %}
       </section>
 
     </div>

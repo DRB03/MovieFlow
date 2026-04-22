@@ -5,6 +5,7 @@ from movies.forms import MovieReviewForm, MovieCommentForm
 from django.db.models import Q, Avg, Count
 from movies.models import Movie, Genre
 from django.contrib.auth.decorators import login_required
+from movies.recommendation_engine import RecommendationEngine
 
 def all_movies(request):
     movies= Movie.objects.all()
@@ -54,12 +55,15 @@ def movie(request, movie_id):
     movie = Movie.objects.get(id=movie_id)
     review_form = MovieReviewForm()
     review_stats = movie.moviereview_set.aggregate(avg_rating=Avg('rating'), total_reviews=Count('id'))
+    recommender = RecommendationEngine(movie=movie, user=request.user, limit=6)
+    recommendations = recommender.get_recommendations()
     context = {
         'movie': movie,
         'saludo': 'welcome',
         'review_form': review_form,
         'avg_user_score': review_stats['avg_rating'],
         'total_user_reviews': review_stats['total_reviews'],
+        'recommendations': recommendations,
     }
     return render(request,'movies/movie.html', context=context )
 

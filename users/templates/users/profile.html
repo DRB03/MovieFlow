@@ -3,7 +3,7 @@
 {% block content %}
 <section class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
 	<header class="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-bordercol dark:bg-surface/60">
-		<p class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-muted">Perfil de usuario</p>
+		<p class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-muted">User profile</p>
 		<h1 class="mt-2 text-2xl font-bold text-gray-900 dark:text-textcol">
 			{% if profile_user.first_name %}
 				{{ profile_user.first_name }}
@@ -11,31 +11,31 @@
 				{{ profile_user.username }}
 			{% endif %}
 		</h1>
-		<p class="mt-1 text-sm text-gray-600 dark:text-gray-300">Correo: {{ profile_user.email|default:"No registrado" }}</p>
+		<p class="mt-1 text-sm text-gray-600 dark:text-gray-300">Email: {{ profile_user.email|default:"Not provided" }}</p>
 		<p class="mt-4">
-			<a href="{% url 'logout' %}" class="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-bordercol dark:text-gray-200 dark:hover:bg-surface">Cerrar sesión</a>
+			<a href="{% url 'logout' %}" class="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-bordercol dark:text-gray-200 dark:hover:bg-surface">Log out</a>
 		</p>
 	</header>
 
 	<section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-bordercol dark:bg-surface/60">
-		<h2 class="text-xl font-semibold text-gray-900 dark:text-textcol">Mis reseñas</h2>
+		<h2 class="text-xl font-semibold text-gray-900 dark:text-textcol">My reviews</h2>
 
 		{% if reviews %}
 			<ul class="mt-5 space-y-4">
 				{% for review in reviews %}
 					<li class="rounded-lg border border-gray-200 p-4 dark:border-bordercol">
-						<p class="text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-muted">Película</p>
+						<p class="text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-muted">Movie</p>
 						<p class="text-base font-semibold text-gray-900 dark:text-textcol">{{ review.movie.title }}</p>
-						<p class="mt-3 text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-muted">Título de reseña</p>
+						<p class="mt-3 text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-muted">Review title</p>
 						<p class="text-base text-gray-900 dark:text-textcol">{{ review.title }}</p>
 						<p class="mt-3 text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-muted">Rating</p>
 						<p class="text-base text-gray-900 dark:text-textcol">{{ review.rating }}/100</p>
-						<p class="mt-3 text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-muted">Texto</p>
-						<p class="text-base text-gray-700 dark:text-gray-200">{{ review.review|default:"Sin texto" }}</p>
+						<p class="mt-3 text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-muted">Text</p>
+						<p class="text-base text-gray-700 dark:text-gray-200">{{ review.review|default:"No text" }}</p>
 						<form method="post" action="{% url 'delete_review' review.id %}" class="mt-4">
 							{% csrf_token %}
 							<button type="submit" class="inline-flex items-center rounded-md border border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 dark:border-red-400/50 dark:text-red-400 dark:hover:bg-red-500/10">
-								Eliminar reseña
+								Delete review
 							</button>
 						</form>
 					</li>
@@ -43,7 +43,7 @@
 			</ul>
 		{% else %}
 			<p class="mt-4 rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-600 dark:border-bordercol dark:text-gray-300">
-				Aún no has escrito reseñas. Cuando publiques una, aparecerá aquí.
+				You have not written any reviews yet. When you publish one, it will appear here.
 			</p>
 		{% endif %}
 	</section>
