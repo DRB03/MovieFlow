@@ -98,7 +98,7 @@
         <div class="mt-4 inline-flex items-center gap-2 rounded border border-gray-200 dark:border-bordercol bg-white dark:bg-surface px-3 py-1.5">
           <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">User Score</span>
           {% if avg_user_score %}
-          <span class="text-sm font-bold accent-blue">{{ avg_user_score|floatformat:1 }}/100</span>
+          <span class="text-sm font-bold accent-blue">{{ avg_user_score|floatformat }}/10</span>
           <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">({{ total_user_reviews }} reviews)</span>
           {% else %}
           <span class="text-sm font-bold text-gray-700 dark:text-gray-200">No ratings yet</span>
@@ -109,10 +109,7 @@
           {% if user.is_authenticated %}
           <a
             class="inline-flex items-center rounded border border-gray-300 dark:border-bordercol px-4 py-2 font-mono text-[0.7rem] uppercase tracking-wider text-gray-700 dark:text-gray-200 hover:border-[#40bcf4] hover:text-sky-500 transition-colors"
-            hx-get="/movies/movie_review/add/{{movie.id}}"
-            hx-target="body"
-            hx-swap="beforeend"
-            href="#"
+            href="{% url 'add_review' movie.id %}"
           >
             Write a review
           </a>
@@ -250,7 +247,7 @@
               <span class="font-mono text-[0.65rem] uppercase tracking-widest text-gray-500 dark:text-muted">Average User Score</span>
               <span class="text-sm font-semibold text-right accent-blue">
                 {% if avg_user_score %}
-                  {{ avg_user_score|floatformat:1 }}/100
+                  {{ avg_user_score|floatformat }}/10
                 {% else %}
                   No ratings yet
                 {% endif %}

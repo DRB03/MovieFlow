@@ -6,6 +6,7 @@ from django.db.models import Q, Avg, Count
 from movies.models import Movie, Genre
 from django.contrib.auth.decorators import login_required
 from movies.recommendation_engine import RecommendationEngine
+from django.shortcuts import render, redirect
 
 def all_movies(request):
     movies= Movie.objects.all()
@@ -92,25 +93,34 @@ def add_comment(request, movie_id):
 
 @login_required(login_url='/users/login')
 def add_review(request, movie_id):
-    form = None
     movie = Movie.objects.get(id=movie_id)
+    
     if request.method == 'POST':
         form = MovieReviewForm(request.POST)
         if form.is_valid():
             rating = form.cleaned_data['rating']
             title  = form.cleaned_data['title']
             review = form.cleaned_data['review']
+            
+            # Guardamos la reseña en la base de datos
             movie_review = MovieReview(
-                    movie=movie,
-                    rating=rating,
-                    title=title,
-                    review=review,
-                    user=request.user)
+                movie=movie,
+                rating=rating,
+                title=title,
+                review=review,
+                user=request.user
+            )
             movie_review.save()
-            return HttpResponse(status=204,
-                                headers={'HX-Trigger': 'listChanged'})
+            
+            # CAMBIO CLAVE: El profe pidió redirigir a la vista de la película
+            # Usamos el 'name' que acabamos de agregar en urls.py
+            return redirect('movie_detail', movie_id=movie.id)
     else:
+        # Si entra por GET, solo le mostramos el formulario vacío
         form = MovieReviewForm()
-        return render(request,
-                  'movies/movie_review_form.html',
-                  {'movie_review_form': form, 'movie':movie})
+        
+    # Renderiza la página dedicada para crear la reseña
+    return render(request, 'movies/movie_review_form.html', {
+        'movie_review_form': form, 
+        'movie': movie
+    })
