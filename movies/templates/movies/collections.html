@@ -1,0 +1,136 @@
+{% extends "movies/base.html" %}
+
+{% block style %}
+{{ block.super }}
+<style>
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #40bcf4;
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .movie-card { position: relative; }
+  .movie-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(64,188,244,.07) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+  }
+  .movie-card:hover::before { opacity: 1; }
+</style>
+{% endblock style %}
+
+{% block content %}
+
+{# ── Page header ─────────────────────────────────────────────────────── #}
+<section class="bg-gray-100 dark:bg-[#1a2030] border-b border-gray-200 dark:border-bordercol">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-12">
+
+    <p class="font-mono text-[0.68rem] uppercase tracking-widest text-gray-500 dark:text-muted mb-3">
+      <a href="{% url 'index' %}" class="hover:text-[#40bcf4] transition-colors">Movies</a>
+      &nbsp;/&nbsp;<span style="color:#40bcf4;">My Movies</span>
+    </p>
+
+    <div class="flex flex-wrap items-end gap-4">
+      <div>
+        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-textcol leading-none flex items-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-9 h-9 text-red-500 shrink-0">
+            <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"/>
+          </svg>
+          My Movies
+        </h1>
+        <p class="mt-2 font-mono text-[0.7rem] uppercase tracking-widest text-gray-500 dark:text-muted">
+          {{ liked_movies.count }} film{{ liked_movies.count|pluralize }} in your collection
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+{# ── Grid ─────────────────────────────────────────────────────────────── #}
+<main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-12">
+
+  {% if liked_movies %}
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+    {% for m in liked_movies %}
+    <a
+      href="{% url 'movie_detail' m.id %}"
+      class="movie-card group flex flex-col rounded-lg border border-gray-200 dark:border-bordercol bg-white dark:bg-surface overflow-hidden
+             transition-all duration-300 hover:border-[#40bcf4] hover:-translate-y-1 hover:shadow-xl"
+    >
+      {# Poster #}
+      <div class="aspect-[2/3] bg-gray-200 dark:bg-[#151b27] overflow-hidden relative">
+        <img
+          class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/{{ m.poster_path }}"
+          alt="{{ m.title }} poster"
+          onerror="this.parentElement.innerHTML='<div class=\'flex items-center justify-center h-full text-gray-400 dark:text-muted font-mono text-[0.6rem] uppercase tracking-wider text-center px-2\'>No poster</div>';"
+        />
+        {# Heart badge #}
+        <div class="absolute top-2 right-2 bg-black/60 backdrop-blur-sm rounded-full p-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 text-red-500">
+            <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"/>
+          </svg>
+        </div>
+        {# Year badge #}
+        <div class="absolute top-2 left-2 bg-black/65 backdrop-blur-sm rounded px-1.5 py-0.5 font-mono text-[0.6rem] text-white/90 leading-none">
+          {{ m.release_date|date:"Y" }}
+        </div>
+      </div>
+
+      {# Card footer #}
+      <div class="p-3 flex flex-col gap-1 flex-1">
+        <h2 class="font-semibold text-xs text-gray-900 dark:text-textcol line-clamp-2 group-hover:text-[#40bcf4] transition-colors leading-snug">
+          {{ m.title }}
+        </h2>
+        {% if m.genres.all %}
+        <p class="font-mono text-[0.58rem] text-gray-400 dark:text-muted/70 line-clamp-1">
+          {% for g in m.genres.all %}{{ g.name }}{% if not forloop.last %} · {% endif %}{% endfor %}
+        </p>
+        {% endif %}
+        <p class="mt-auto pt-1 font-mono text-[0.6rem] uppercase tracking-wider text-[#40bcf4] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          View details →
+        </p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  {# Empty state #}
+  <div class="flex flex-col items-center justify-center py-24 text-center">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-5 text-gray-300 dark:text-muted">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
+    </svg>
+    <h2 class="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">Your collection is empty</h2>
+    <p class="font-mono text-[0.72rem] uppercase tracking-wider text-gray-500 dark:text-muted mb-6">
+      Like any movie to save it here
+    </p>
+    <a
+      href="{% url 'index' %}"
+      class="inline-flex items-center gap-2 rounded border border-[#40bcf4] px-5 py-2.5 font-mono text-[0.72rem] uppercase tracking-wider text-[#40bcf4] hover:bg-[#40bcf4]/10 transition-colors"
+    >
+      Browse the catalog →
+    </a>
+  </div>
+  {% endif %}
+
+</main>
+
+{% endblock content %}
