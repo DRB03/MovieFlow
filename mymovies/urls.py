@@ -16,13 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from movies.views import index
+from movies.views import index, collections
 from users.views import profile_view
 
 urlpatterns = [
-    
     path('admin/', admin.site.urls),
     path('profile/', profile_view, name='profile'),
+    path('collections', collections, name='collections'),
     path('users/', include('users.urls')),
     path('movies/', include('movies.urls')),
     path('', index, name='index')

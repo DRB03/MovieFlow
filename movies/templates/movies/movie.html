@@ -122,12 +122,41 @@
           </a>
           {% endif %}
 
-          <a
-            href="#"
-            class="inline-flex items-center rounded border border-red-300 dark:border-red-400/40 px-4 py-2 font-mono text-[0.7rem] uppercase tracking-wider text-red-600 dark:text-red-400 hover:border-red-500 hover:text-red-500 transition-colors"
+          {# ── Like button ──────────────────────────────────────────── #}
+          {% if user.is_authenticated %}
+          <button
+            id="like-btn-{{ movie.id }}"
+            data-movie-id="{{ movie.id }}"
+            data-liked="{{ user_liked|yesno:'true,false' }}"
+            onclick="handleLike(this)"
+            class="like-btn inline-flex items-center gap-2 rounded border px-4 py-2 font-mono text-[0.7rem] uppercase tracking-wider transition-all duration-200
+              {% if user_liked %}
+                border-red-500 bg-red-500/10 text-red-500
+              {% else %}
+                border-red-300 dark:border-red-400/40 text-red-600 dark:text-red-400 hover:border-red-500 hover:text-red-500
+              {% endif %}"
           >
+            <svg id="like-icon-{{ movie.id }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+              class="w-4 h-4 transition-all duration-200 {% if user_liked %}fill-red-500{% else %}fill-none stroke-current stroke-2{% endif %}"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
+            </svg>
+            <span id="like-label-{{ movie.id }}">{% if user_liked %}Liked{% else %}Like{% endif %}</span>
+            <span id="like-count-{{ movie.id }}" class="font-mono text-[0.6rem] opacity-60">({{ like_count }})</span>
+          </button>
+          {% else %}
+          <a
+            href="{% url 'login' %}?next={{ request.path|urlencode }}"
+            class="inline-flex items-center gap-2 rounded border border-red-300 dark:border-red-400/40 px-4 py-2 font-mono text-[0.7rem] uppercase tracking-wider text-red-600 dark:text-red-400 hover:border-red-500 hover:text-red-500 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>
+            </svg>
             Like
           </a>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -147,15 +176,15 @@
       <section>
         <p class="section-label">Cast & Crew</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-          {% regroup movie.moviecredit_set.all by person as credits_by_person %}
+        {% regroup movie.moviecredit_set.all by person as credits_by_person %}
           {% for group in credits_by_person %}
           <a
-            href="#"
+            href="{% url 'actor_detail' group.grouper.id %}"
             class="rounded border border-gray-200 dark:border-bordercol bg-white dark:bg-surface px-4 py-3 transition-colors hover:border-[#40bcf4] hover:text-sky-500"
-            aria-disabled="true"
-            title="Actor and production pages will be available in a future update"
           >
-            <p class="font-mono text-[0.6rem] uppercase tracking-widest text-gray-500 dark:text-muted">Credit</p>
+            <p class="font-mono text-[0.6rem] uppercase tracking-widest text-gray-500 dark:text-muted">
+              {% for credit in group.list %}{{ credit.job }}{% if not forloop.last %} · {% endif %}{% endfor %}
+            </p>
             <p class="mt-1 font-semibold text-sm text-gray-900 dark:text-textcol">{{ group.grouper }}</p>
           </a>
           {% empty %}
@@ -264,3 +293,52 @@
   </div>
 </div>
 {% endblock content %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+async function handleLike(btn) {
+  const movieId = btn.dataset.movieId;
+  const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+  // Optimistic UI: pulse animation
+  btn.classList.add('scale-95');
+  setTimeout(() => btn.classList.remove('scale-95'), 150);
+
+  try {
+    const resp = await fetch(`/movies/like/${movieId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    });
+    if (!resp.ok) throw new Error('Network error');
+    const data = await resp.json();
+
+    const icon  = document.getElementById(`like-icon-${movieId}`);
+    const label = document.getElementById(`like-label-${movieId}`);
+    const count = document.getElementById(`like-count-${movieId}`);
+
+    btn.dataset.liked = data.liked ? 'true' : 'false';
+    count.textContent = `(${data.count})`;
+
+    if (data.liked) {
+      label.textContent = 'Liked';
+      icon.classList.replace('fill-none', 'fill-red-500');
+      icon.classList.remove('stroke-current', 'stroke-2');
+      btn.classList.add('border-red-500', 'bg-red-500/10', 'text-red-500');
+      btn.classList.remove('border-red-300', 'hover:border-red-500', 'hover:text-red-500');
+    } else {
+      label.textContent = 'Like';
+      icon.classList.replace('fill-red-500', 'fill-none');
+      icon.classList.add('stroke-current', 'stroke-2');
+      btn.classList.remove('border-red-500', 'bg-red-500/10', 'text-red-500');
+      btn.classList.add('border-red-300', 'hover:border-red-500', 'hover:text-red-500');
+    }
+  } catch (err) {
+    console.error('Like error:', err);
+  }
+}
+</script>
+{% endblock scripts %}

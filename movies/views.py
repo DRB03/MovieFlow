@@ -1,12 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from movies.models import Movie, MovieReview, MovieComment
+from movies.models import Movie, MovieReview, MovieComment, Person, MovieCredit, MovieLike
 from movies.forms import MovieReviewForm, MovieCommentForm
 from django.db.models import Q, Avg, Count
 from movies.models import Movie, Genre
 from django.contrib.auth.decorators import login_required
 from movies.recommendation_engine import RecommendationEngine
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 def all_movies(request):
     movies= Movie.objects.all()
@@ -58,6 +60,11 @@ def movie(request, movie_id):
     review_stats = movie.moviereview_set.aggregate(avg_rating=Avg('rating'), total_reviews=Count('id'))
     recommender = RecommendationEngine(movie=movie, user=request.user, limit=6)
     recommendations = recommender.get_recommendations()
+    user_liked = (
+        request.user.is_authenticated
+        and MovieLike.objects.filter(user=request.user, movie=movie).exists()
+    )
+    like_count = movie.likes.count()
     context = {
         'movie': movie,
         'saludo': 'welcome',
@@ -65,6 +72,8 @@ def movie(request, movie_id):
         'avg_user_score': review_stats['avg_rating'],
         'total_user_reviews': review_stats['total_reviews'],
         'recommendations': recommendations,
+        'user_liked': user_liked,
+        'like_count': like_count,
     }
     return render(request,'movies/movie.html', context=context )
 
@@ -124,3 +133,39 @@ def add_review(request, movie_id):
         'movie_review_form': form, 
         'movie': movie
     })
+
+def actor_detail(request, actor_id):
+    actor = get_object_or_404(Person, id=actor_id)
+    # Only movies already stored in our DB
+    movies = Movie.objects.filter(moviecredit__person=actor).distinct()
+    context = {
+        'actor': actor,
+        'movies': movies,
+    }
+    return render(request, 'movies/actor.html', context=context)
+
+@login_required(login_url='/users/login')
+@require_POST
+def toggle_like(request, movie_id):
+    """Alterna el estado Like/Unlike del usuario sobre una película.
+    Devuelve JSON con {liked: bool, count: int} para actualizar el botón sin recargar."""
+    movie = get_object_or_404(Movie, id=movie_id)
+    like, created = MovieLike.objects.get_or_create(user=request.user, movie=movie)
+    if not created:
+        # Ya existía → quitar like
+        like.delete()
+        liked = False
+    else:
+        liked = True
+    return JsonResponse({'liked': liked, 'count': movie.likes.count()})
+
+@login_required(login_url='/users/login')
+def collections(request):
+    """Vista 'My Movies': muestra las películas a las que el usuario dio Like."""
+    liked_movies = Movie.objects.filter(
+        likes__user=request.user
+    ).prefetch_related('genres').order_by('-likes__created_at')
+    context = {
+        'liked_movies': liked_movies,
+    }
+    return render(request, 'movies/collections.html', context=context)

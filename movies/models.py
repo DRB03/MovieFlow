@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils import timezone
 
 # Create your models here.
 
@@ -13,6 +14,11 @@ class Genre(models.Model):
     
 class Person(models.Model):
     name = models.CharField(max_length=128)
+    tmdb_id = models.IntegerField(unique=True, null=True, blank=True)
+    biography = models.TextField(blank=True, null=True)
+    birthday = models.DateField(blank=True, null=True)
+    place_of_birth = models.CharField(max_length=255, blank=True, null=True)
+    profile_path = models.URLField(blank=True, null=True)
     
     def __str__(self):
         return self.name
@@ -53,6 +59,19 @@ class MovieComment(models.Model):
     like = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)], null=True, blank=True)
     # AGREGAMOS EL CAMPO PARA EL TEXTO:
     comment_text = models.TextField(blank=True, null=True)
+
+
+class MovieLike(models.Model):
+    """Almacena los Me Gusta de cada usuario sobre una película."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='movie_likes')
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = ('user', 'movie')  # Un usuario solo puede dar like una vez
+
+    def __str__(self):
+        return f'{self.user.username} ❤ {self.movie.title}'
 
 
 class MovieReview(models.Model):
