@@ -2,7 +2,7 @@
 
 {% block content %}
 <section class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-	<header class="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-bordercol dark:bg-surface/60">
+	<header class="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-bordercol dark:bg-surface/60 transition-colors">
 		<p class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-muted">User profile</p>
 		<h1 class="mt-2 text-2xl font-bold text-gray-900 dark:text-textcol">
 			{% if profile_user.first_name %}
@@ -13,38 +13,72 @@
 		</h1>
 		<p class="mt-1 text-sm text-gray-600 dark:text-gray-300">Email: {{ profile_user.email|default:"Not provided" }}</p>
 		<p class="mt-4">
-			<a href="{% url 'logout' %}" class="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-bordercol dark:text-gray-200 dark:hover:bg-surface">Log out</a>
+			<a href="{% url 'logout' %}" class="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-bordercol dark:text-gray-200 dark:hover:bg-surface transition-colors">Log out</a>
 		</p>
 	</header>
 
-	<section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-bordercol dark:bg-surface/60">
-		<h2 class="text-xl font-semibold text-gray-900 dark:text-textcol">My reviews</h2>
+	<section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-bordercol dark:bg-surface/60 transition-colors">
+		<h2 class="text-xl font-semibold text-gray-900 dark:text-textcol mb-6">My reviews</h2>
 
 		{% if reviews %}
-			<ul class="mt-5 space-y-4">
+			<ul class="space-y-6">
 				{% for review in reviews %}
-					<li class="rounded-lg border border-gray-200 p-4 dark:border-bordercol">
-						<p class="text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-muted">Movie</p>
-						<p class="text-base font-semibold text-gray-900 dark:text-textcol">{{ review.movie.title }}</p>
-						<p class="mt-3 text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-muted">Review title</p>
-						<p class="text-base text-gray-900 dark:text-textcol">{{ review.title }}</p>
-						<p class="mt-3 text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-muted">Rating</p>
-						<p class="text-base text-gray-900 dark:text-textcol">{{ review.rating }}/100</p>
-						<p class="mt-3 text-sm font-mono uppercase tracking-wider text-gray-500 dark:text-muted">Text</p>
-						<p class="text-base text-gray-700 dark:text-gray-200">{{ review.review|default:"No text" }}</p>
-						<form method="post" action="{% url 'delete_review' review.id %}" class="mt-4">
-							{% csrf_token %}
-							<button type="submit" class="inline-flex items-center rounded-md border border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 dark:border-red-400/50 dark:text-red-400 dark:hover:bg-red-500/10">
-								Delete review
-							</button>
-						</form>
+					<li class="rounded-lg border border-gray-200 p-4 dark:border-bordercol flex flex-col sm:flex-row gap-5 transition-all hover:shadow-md dark:hover:bg-surface/80">
+						
+						<div class="flex-shrink-0 mx-auto sm:mx-0">
+							<a href="{% url 'movie_detail' review.movie.id %}" class="block overflow-hidden rounded-md transition-transform hover:scale-105 shadow-sm">
+								{% if review.movie.poster_path %}
+									<img src="https://image.tmdb.org/t/p/w200/{{ review.movie.poster_path }}" alt="{{ review.movie.title }} poster" class="w-24 sm:w-28 object-cover h-auto">
+								{% else %}
+									<div class="w-24 sm:w-28 h-36 sm:h-40 bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
+										<span class="text-[0.6rem] text-gray-500 font-mono uppercase tracking-widest text-center">No Poster</span>
+									</div>
+								{% endif %}
+							</a>
+						</div>
+
+						<div class="flex-1 flex flex-col justify-between">
+							<div>
+								<p class="text-[0.65rem] font-mono uppercase tracking-widest text-gray-500 dark:text-muted mb-1">Movie</p>
+								<a href="{% url 'movie_detail' review.movie.id %}" class="text-lg font-bold text-gray-900 dark:text-textcol hover:text-green-600 dark:hover:text-accent transition-colors inline-block mb-3">
+									{{ review.movie.title }}
+								</a>
+
+								<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3 p-3 bg-gray-50 dark:bg-[#0f1215] rounded border border-gray-100 dark:border-bordercol">
+									<div>
+										<p class="text-[0.65rem] font-mono uppercase tracking-widest text-gray-500 dark:text-muted mb-1">Review title</p>
+										<p class="text-sm font-semibold text-gray-900 dark:text-textcol">{{ review.title }}</p>
+									</div>
+									<div>
+										<p class="text-[0.65rem] font-mono uppercase tracking-widest text-gray-500 dark:text-muted mb-1">Rating</p>
+										<p class="text-sm font-bold text-green-600 dark:text-accent">{{ review.rating|floatformat }}/10</p>
+									</div>
+								</div>
+
+								<div>
+									<p class="text-[0.65rem] font-mono uppercase tracking-widest text-gray-500 dark:text-muted mb-1">Text</p>
+									<p class="text-sm text-gray-700 dark:text-gray-300 italic">"{{ review.review|default:"No text provided" }}"</p>
+								</div>
+							</div>
+
+							<div class="mt-4 flex justify-end">
+								<form method="post" action="{% url 'delete_review' review.id %}">
+									{% csrf_token %}
+									<button type="submit" class="inline-flex items-center rounded border border-red-300 px-3 py-1.5 text-[0.7rem] font-mono uppercase tracking-widest text-red-700 hover:bg-red-50 dark:border-red-400/50 dark:text-red-400 dark:hover:bg-red-500/10 transition-colors">
+										Delete review
+									</button>
+								</form>
+							</div>
+						</div>
 					</li>
 				{% endfor %}
 			</ul>
 		{% else %}
-			<p class="mt-4 rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-600 dark:border-bordercol dark:text-gray-300">
-				You have not written any reviews yet. When you publish one, it will appear here.
-			</p>
+			<div class="mt-4 rounded-lg border border-dashed border-gray-300 p-8 text-center dark:border-bordercol bg-gray-50 dark:bg-[#0f1215]">
+				<p class="text-sm text-gray-600 dark:text-gray-300 font-mono tracking-wide">
+					You have not written any reviews yet.<br>When you publish one, it will appear here.
+				</p>
+			</div>
 		{% endif %}
 	</section>
 </section>
