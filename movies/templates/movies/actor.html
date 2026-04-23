@@ -1,0 +1,237 @@
+{% extends "movies/base.html" %}
+
+{% block style %}
+{{ block.super }}
+<style>
+  :root { --accent-blue: #40bcf4; }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.12);
+  }
+
+  .accent-blue { color: var(--accent-blue); }
+
+  /* Biography clamp */
+  .bio-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    line-clamp: 5;                /* standard property for compatibility */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .bio-clamp.expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;           /* standard property for compatibility */
+  }
+
+  /* Shimmer on filmography cards */
+  .movie-card { position: relative; }
+  .movie-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg,rgba(64,188,244,.07) 0%,transparent 60%);
+    opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+  }
+  .movie-card:hover::before { opacity: 1; }
+
+  /* Photo glow */
+  .actor-photo-wrap {
+    box-shadow: 0 0 0 1px rgba(64,188,244,.15), 0 8px 32px rgba(0,0,0,.35);
+    transition: box-shadow .3s;
+  }
+  .actor-photo-wrap:hover {
+    box-shadow: 0 0 0 2px rgba(64,188,244,.45), 0 12px 40px rgba(0,0,0,.4);
+  }
+</style>
+{% endblock style %}
+
+{% block content %}
+
+{# ─── Hero strip ─────────────────────────────────────────────────────────── #}
+<section class="bg-gray-100 dark:bg-[#1a2030] border-b border-gray-200 dark:border-bordercol">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+
+    {# Breadcrumb #}
+    <p class="font-mono text-[0.68rem] uppercase tracking-widest text-gray-500 dark:text-muted mb-6">
+      <a href="{% url 'index' %}" class="hover:text-[#40bcf4] transition-colors">Movies</a>
+      &nbsp;/&nbsp;People&nbsp;/&nbsp;<span class="accent-blue">{{ actor.name }}</span>
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-8 lg:gap-14 items-start">
+
+      {# ── Photo ── #}
+      <div class="shrink-0 mx-auto sm:mx-0">
+        <div class="actor-photo-wrap w-44 sm:w-52 lg:w-64 overflow-hidden rounded-xl bg-white dark:bg-surface aspect-[2/3]">
+          {% if actor.profile_path %}
+            <img
+              class="block h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+              src="{{ actor.profile_path }}"
+              alt="Photo of {{ actor.name }}"
+              onerror="this.closest('.actor-photo-wrap').innerHTML='<div class=\'flex items-center justify-center h-full text-gray-400 dark:text-muted font-mono text-xs uppercase tracking-wider\'>No Photo</div>';"
+            />
+          {% else %}
+            <div class="flex flex-col items-center justify-center h-full gap-2 text-gray-400 dark:text-muted">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-12 h-12 opacity-40">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+              </svg>
+              <span class="font-mono text-xs uppercase tracking-wider">No Photo</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# ── Text info ── #}
+      <div class="min-w-0 flex-1 space-y-5">
+
+        <div>
+          <p class="font-mono text-[0.65rem] uppercase tracking-widest text-gray-500 dark:text-muted mb-1">Actor / Person</p>
+          <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-textcol leading-none">
+            {{ actor.name }}
+          </h1>
+        </div>
+
+        {# Meta chips #}
+        <div class="flex flex-wrap gap-3">
+          {% if actor.birthday %}
+          <div class="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-bordercol bg-white dark:bg-surface px-3 py-1.5 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 text-[#40bcf4] shrink-0">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+            </svg>
+            <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Born</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-textcol">{{ actor.birthday|date:"F j, Y" }}</span>
+          </div>
+          {% endif %}
+
+          {% if actor.place_of_birth %}
+          <div class="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-bordercol bg-white dark:bg-surface px-3 py-1.5 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 text-[#40bcf4] shrink-0">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+            </svg>
+            <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">From</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-textcol">{{ actor.place_of_birth }}</span>
+          </div>
+          {% endif %}
+
+          <div class="inline-flex items-center gap-2 rounded-full border border-gray-200 dark:border-bordercol bg-white dark:bg-surface px-3 py-1.5 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 text-[#40bcf4] shrink-0">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375z"/>
+            </svg>
+            <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Credits in DB</span>
+            <span class="text-sm font-bold accent-blue">{{ movies.count }}</span>
+          </div>
+        </div>
+
+        {# Biography #}
+        {% if actor.biography %}
+        <div>
+          <p class="section-label">Biography</p>
+          <p id="bio-text" class="font-serif text-base leading-8 text-gray-700 dark:text-gray-300 bio-clamp">
+            {{ actor.biography }}
+          </p>
+          <button
+            id="bio-toggle"
+            onclick="toggleBio()"
+            class="mt-3 inline-flex items-center gap-1 font-mono text-[0.68rem] uppercase tracking-wider accent-blue hover:underline"
+          >
+            <svg id="bio-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 transition-transform duration-300">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+            </svg>
+            Show more
+          </button>
+        </div>
+        {% endif %}
+
+      </div>{# end text info #}
+    </div>
+  </div>
+</section>
+
+{# ─── Filmography ────────────────────────────────────────────────────────── #}
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+  <p class="section-label">Filmography</p>
+
+  {% if movies %}
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+    {% for m in movies %}
+    <a
+      href="{% url 'movie_detail' m.id %}"
+      class="movie-card group flex flex-col rounded-lg border border-gray-200 dark:border-bordercol bg-white dark:bg-surface overflow-hidden transition-all duration-300 hover:border-[#40bcf4] hover:-translate-y-1 hover:shadow-xl"
+    >
+      {# Poster #}
+      <div class="aspect-[2/3] bg-gray-200 dark:bg-[#151b27] overflow-hidden relative">
+        <img
+          class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          src="https://image.tmdb.org/t/p/w600_and_h900_bestv2/{{ m.poster_path }}"
+          alt="{{ m.title }} poster"
+          onerror="this.parentElement.innerHTML='<div class=\'flex items-center justify-center h-full text-gray-400 dark:text-muted font-mono text-[0.6rem] uppercase tracking-wider text-center px-2\'>Poster unavailable</div>';"
+        />
+        {# Year badge #}
+        <div class="absolute top-2 left-2 bg-black/65 backdrop-blur-sm rounded px-1.5 py-0.5 font-mono text-[0.6rem] text-white/90 leading-none">
+          {{ m.release_date|date:"Y" }}
+        </div>
+      </div>
+
+      {# Card footer #}
+      <div class="p-3 flex flex-col gap-1 flex-1">
+        <h2 class="font-semibold text-xs text-gray-900 dark:text-textcol line-clamp-2 group-hover:text-[#40bcf4] transition-colors leading-snug">
+          {{ m.title }}
+        </h2>
+        {% if m.genres.all %}
+        <p class="font-mono text-[0.58rem] text-gray-400 dark:text-muted/70 line-clamp-1">
+          {% for g in m.genres.all %}{{ g.name }}{% if not forloop.last %} · {% endif %}{% endfor %}
+        </p>
+        {% endif %}
+        <p class="mt-auto pt-1 font-mono text-[0.6rem] uppercase tracking-wider text-[#40bcf4] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          View details →
+        </p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="rounded-xl border border-dashed border-gray-300 dark:border-bordercol bg-white dark:bg-surface p-12 text-center">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-muted">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375z"/>
+    </svg>
+    <p class="font-mono text-sm text-gray-500 dark:text-muted uppercase tracking-wider">
+      No movies from this person are currently in our database.
+    </p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+  function toggleBio() {
+    const text    = document.getElementById('bio-text');
+    const btn     = document.getElementById('bio-toggle');
+    const chevron = document.getElementById('bio-chevron');
+    const expanded = text.classList.toggle('expanded');
+    btn.childNodes[btn.childNodes.length - 1].textContent = expanded ? ' Show less' : ' Show more';
+    chevron.style.transform = expanded ? 'rotate(180deg)' : 'rotate(0deg)';
+  }
+</script>
+{% endblock scripts %}
