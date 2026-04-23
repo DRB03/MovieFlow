@@ -38,11 +38,50 @@
 
   {# ── Profile header ──────────────────────────────────────────────── #}
   <header class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-bordercol dark:bg-surface/60 transition-colors">
-    <p class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-muted">User profile</p>
-    <h1 class="mt-2 text-2xl font-bold text-gray-900 dark:text-textcol">
-      {% if profile_user.first_name %}{{ profile_user.first_name }}{% else %}{{ profile_user.username }}{% endif %}
-    </h1>
-    <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">{{ profile_user.email|default:"No email provided" }}</p>
+    <div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+      <div class="flex items-center gap-4">
+        <img src="{{ profile.avatar_url }}" alt="{{ profile_user.username }} avatar" class="w-20 h-20 rounded-full object-cover border border-gray-200 dark:border-bordercol">
+        <div>
+          <p class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-muted">User profile</p>
+          <h1 class="mt-2 text-2xl font-bold text-gray-900 dark:text-textcol">
+            {% if profile_user.first_name %}{{ profile_user.first_name }}{% else %}{{ profile_user.username }}{% endif %}
+          </h1>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">{{ profile_user.email|default:"No email provided" }}</p>
+        </div>
+      </div>
+
+      <form method="post" enctype="multipart/form-data" class="w-full md:w-auto md:min-w-[320px] rounded-lg border border-gray-200 dark:border-bordercol bg-gray-50 dark:bg-[#0f1215] p-4 space-y-3">
+        {% csrf_token %}
+        <p class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Profile Picture</p>
+
+        <div>
+          <label for="id_profile_image" class="block text-xs font-semibold mb-1 text-gray-700 dark:text-gray-300">Upload custom image</label>
+          {{ avatar_form.profile_image }}
+          {% if avatar_form.profile_image.errors %}
+            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ avatar_form.profile_image.errors|striptags }}</p>
+          {% endif %}
+        </div>
+
+        <div>
+          <p class="block text-xs font-semibold mb-2 text-gray-700 dark:text-gray-300">Or choose a default avatar</p>
+          <div class="grid grid-cols-2 gap-2">
+            {% for radio in avatar_form.default_avatar %}
+            <label class="cursor-pointer rounded border border-gray-200 dark:border-bordercol p-2 hover:border-[#40bcf4] transition-colors">
+              <div class="flex items-center gap-2">
+                {{ radio.tag }}
+                <img src="/static/{{ radio.data.value }}" alt="{{ radio.choice_label }}" class="w-8 h-8 rounded-full object-cover border border-gray-200 dark:border-bordercol">
+                <span class="text-[0.65rem] font-mono uppercase tracking-wide text-gray-600 dark:text-gray-300">{{ radio.choice_label }}</span>
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="inline-flex items-center rounded-md border border-[#40bcf4] px-3 py-2 text-xs font-mono uppercase tracking-widest text-[#40bcf4] hover:bg-[#40bcf4]/10 transition-colors">
+          Save avatar
+        </button>
+      </form>
+    </div>
 
     <div class="mt-4 flex flex-wrap gap-4">
       <div class="inline-flex items-center gap-2 rounded border border-gray-200 dark:border-bordercol bg-gray-50 dark:bg-[#0f1215] px-3 py-1.5">
