@@ -13,6 +13,11 @@ class Genre(models.Model):
     
 class Person(models.Model):
     name = models.CharField(max_length=128)
+    tmdb_id = models.IntegerField(unique=True, null=True, blank=True)
+    biography = models.TextField(blank=True, null=True)
+    birthday = models.DateField(blank=True, null=True)
+    place_of_birth = models.CharField(max_length=255, blank=True, null=True)
+    profile_path = models.URLField(blank=True, null=True)
     
     def __str__(self):
         return self.name
