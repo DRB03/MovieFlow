@@ -6,14 +6,18 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST
-from movies.models import MovieReview
+from movies.models import MovieReview, Movie
 
 @login_required(login_url='/users/login')
 def profile_view(request):
     reviews = MovieReview.objects.filter(user=request.user).select_related('movie').order_by('-id')
+    liked_movies = Movie.objects.filter(
+        likes__user=request.user
+    ).prefetch_related('genres').order_by('-likes__created_at')
     context = {
         'profile_user': request.user,
         'reviews': reviews,
+        'liked_movies': liked_movies,
     }
     return render(request, 'users/profile.html', context)
 
