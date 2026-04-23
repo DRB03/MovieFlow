@@ -68,28 +68,23 @@
       {% endblock content %}
     </main>
 
-    {% block footer %}
-    <footer class="bg-white dark:bg-[#0f1215] border-t border-gray-200 dark:border-bordercol transition-colors mt-12">
-      <div class="mx-auto max-w-7xl overflow-hidden px-6 py-12 lg:px-8">
-        
-        <nav class="-mb-6 columns-2 sm:flex sm:justify-center sm:space-x-12" aria-label="Footer">
-          <div class="pb-6">
-            <a href="https://github.com/DRB03/MovieFlow" target="_blank" class="font-mono text-xs tracking-widest uppercase text-gray-600 dark:text-muted hover:text-green-600 dark:hover:text-accent transition-colors">
-              About the Project
-            </a>
-          </div>
-          <div class="pb-6">
-      
-          </div>
-        </nav>
-        
-        <p class="mt-10 text-center font-mono text-[0.7rem] leading-5 text-gray-500 dark:text-muted uppercase tracking-widest">
-          &copy; 2026 Built by the MovieFlow team.
-        </p>
-        
-      </div>
-    </footer>
-    {% endblock footer %}
+   {% block footer %}
+<footer class="bg-white dark:bg-[#0f1215] border-t border-gray-200 dark:border-bordercol transition-colors mt-12">
+  <div class="mx-auto max-w-7xl overflow-hidden px-6 py-12 lg:px-8 flex flex-col items-center">
+    
+    <nav class="flex justify-center mb-6" aria-label="Footer">
+      <a href="https://github.com/DRB03/MovieFlow" target="_blank" class="font-mono text-xs tracking-widest uppercase text-gray-600 dark:text-muted hover:text-green-600 dark:hover:text-accent transition-colors text-center">
+        About the Project
+      </a>
+    </nav>
+    
+    <p class="text-center font-mono text-[0.7rem] leading-5 text-gray-500 dark:text-muted uppercase tracking-widest">
+      &copy; 2026 Built by the MovieFlow team.
+    </p>
+    
+  </div>
+</footer>
+{% endblock footer %}
 
     <script src="https://unpkg.com/hyperscript.org@0.9.7"></script>
     <script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous"></script>
