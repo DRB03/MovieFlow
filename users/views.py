@@ -7,15 +7,29 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST
 from movies.models import MovieReview, Movie
+from .forms import ProfileAvatarForm
+from .models import Profile
 
 @login_required(login_url='/users/login')
 def profile_view(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        avatar_form = ProfileAvatarForm(request.POST, request.FILES, instance=profile)
+        if avatar_form.is_valid():
+            avatar_form.save()
+            return HttpResponseRedirect(reverse('profile'))
+    else:
+        avatar_form = ProfileAvatarForm(instance=profile)
+
     reviews = MovieReview.objects.filter(user=request.user).select_related('movie').order_by('-id')
     liked_movies = Movie.objects.filter(
         likes__user=request.user
     ).prefetch_related('genres').order_by('-likes__created_at')
     context = {
         'profile_user': request.user,
+        'profile': profile,
+        'avatar_form': avatar_form,
         'reviews': reviews,
         'liked_movies': liked_movies,
     }
