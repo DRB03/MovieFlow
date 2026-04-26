@@ -33,7 +33,12 @@ class RecommendationEngine:
         watched_ids = set(user_ratings.keys())
         watched_ids.add(self.movie.id)
 
-        peer_ids = MovieReview.objects.filter(movie=self.movie).exclude(user=self.user).values_list("user_id", flat=True).distinct()
+        peer_ids = (
+            MovieReview.objects.filter(movie=self.movie, parent__isnull=True)
+            .exclude(user=self.user)
+            .values_list("user_id", flat=True)
+            .distinct()
+        )
 
         peer_similarities = {}
         for peer_id in peer_ids:
@@ -47,7 +52,16 @@ class RecommendationEngine:
 
         scored_movies = defaultdict(lambda: {"weighted_sum": 0.0, "sim_sum": 0.0, "peer_votes": 0})
 
-        peer_reviews = MovieReview.objects.filter(user_id__in=peer_similarities.keys()).exclude(movie_id__in=watched_ids).filter(movie__genres__id__in=movie_genre_ids).select_related("movie").distinct()
+        peer_reviews = (
+            MovieReview.objects.filter(
+                user_id__in=peer_similarities.keys(),
+                parent__isnull=True,
+            )
+            .exclude(movie_id__in=watched_ids)
+            .filter(movie__genres__id__in=movie_genre_ids)
+            .select_related("movie")
+            .distinct()
+        )
 
         for review in peer_reviews:
             sim = peer_similarities.get(review.user_id)
@@ -64,7 +78,9 @@ class RecommendationEngine:
         movie_ids = list(scored_movies.keys())
         avg_map = {
             row["movie_id"]: row["avg_rating"]
-            for row in MovieReview.objects.filter(movie_id__in=movie_ids).values("movie_id").annotate(avg_rating=Avg("rating"))
+            for row in MovieReview.objects.filter(movie_id__in=movie_ids, parent__isnull=True)
+            .values("movie_id")
+            .annotate(avg_rating=Avg("rating"))
         }
         shared_genres_map = self._shared_genres_count(movie_ids)
         movie_map = {movie.id: movie for movie in Movie.objects.filter(id__in=movie_ids).prefetch_related("genres")}
@@ -105,7 +121,10 @@ class RecommendationEngine:
         candidates = (
             Movie.objects.filter(genres__id__in=movie_genre_ids)
             .exclude(id__in=excluded_ids)
-            .annotate(avg_rating=Avg("moviereview__rating"), shared_genres=Count("genres", filter=Q(genres__id__in=movie_genre_ids), distinct=True))
+            .annotate(
+                avg_rating=Avg("moviereview__rating", filter=Q(moviereview__parent__isnull=True)),
+                shared_genres=Count("genres", filter=Q(genres__id__in=movie_genre_ids), distinct=True),
+            )
             .order_by("-shared_genres", "-avg_rating", "-release_date")
             .distinct()
         )
@@ -126,7 +145,9 @@ class RecommendationEngine:
 
     @staticmethod
     def _user_ratings_map(user_id):
-        return dict(MovieReview.objects.filter(user_id=user_id).values_list("movie_id", "rating"))
+        return dict(
+            MovieReview.objects.filter(user_id=user_id, parent__isnull=True).exclude(rating__isnull=True).values_list("movie_id", "rating")
+        )
 
     def _shared_genres_count(self, movie_ids):
         movie_genre_ids = list(self.movie.genres.values_list("id", flat=True))
