@@ -340,5 +340,78 @@ async function handleLike(btn) {
     console.error('Like error:', err);
   }
 }
+
+document.body.addEventListener('click', async function (ev) {
+  const btn = ev.target.closest('.review-react-btn');
+  if (!btn) return;
+  const reviewId = btn.dataset.reviewId;
+  const action = btn.dataset.action;
+  if (!reviewId || !action) return;
+  const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+  const article = btn.closest('[id^="review-"]');
+  try {
+    const resp = await fetch(`/movies/review/${reviewId}/react/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({ action }),
+    });
+    if (!resp.ok) throw new Error('Network error');
+    const data = await resp.json();
+    if (!article) return;
+    const likeEl = article.querySelector('.rc-like');
+    const dislikeEl = article.querySelector('.rc-dislike');
+    if (likeEl) likeEl.textContent = data.like_count;
+    if (dislikeEl) dislikeEl.textContent = data.dislike_count;
+    const likeBtn = article.querySelector('.review-react-btn[data-action="like"]');
+    const dislikeBtn = article.querySelector('.review-react-btn[data-action="dislike"]');
+    const baseLike = 'review-react-btn inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors border-gray-300 dark:border-bordercol text-gray-600 dark:text-gray-300 hover:border-green-500/60';
+    const activeLike = 'review-react-btn inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors border-green-500 bg-green-500/10 text-green-600 dark:text-green-400';
+    const baseDis = 'review-react-btn inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors border-gray-300 dark:border-bordercol text-gray-600 dark:text-gray-300 hover:border-red-500/60';
+    const activeDis = 'review-react-btn inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors border-red-500 bg-red-500/10 text-red-600 dark:text-red-400';
+    if (likeBtn) likeBtn.className = data.my_vote === 1 ? activeLike : baseLike;
+    if (dislikeBtn) dislikeBtn.className = data.my_vote === -1 ? activeDis : baseDis;
+  } catch (e) {
+    console.error('Review reaction error:', e);
+  }
+});
+
+document.body.addEventListener('click', function (ev) {
+  const replyBtn = ev.target.closest('.review-reply-toggle');
+  if (replyBtn) {
+    ev.preventDefault();
+    const id = replyBtn.dataset.replyFor;
+    if (!id) return;
+    const panel = document.getElementById('reply-panel-' + id);
+    if (!panel) return;
+    const isOpen = !panel.classList.contains('hidden');
+    if (isOpen) {
+      panel.classList.add('hidden');
+      replyBtn.setAttribute('aria-expanded', 'false');
+    } else {
+      panel.classList.remove('hidden');
+      replyBtn.setAttribute('aria-expanded', 'true');
+      const ta = panel.querySelector('textarea');
+      if (ta) requestAnimationFrame(function () { ta.focus(); });
+    }
+    return;
+  }
+  const cancelBtn = ev.target.closest('.review-reply-cancel');
+  if (cancelBtn) {
+    ev.preventDefault();
+    const id = cancelBtn.dataset.replyFor;
+    if (!id) return;
+    const panel = document.getElementById('reply-panel-' + id);
+    const article = cancelBtn.closest('article');
+    const toggleBtn = article && article.querySelector('.review-reply-toggle[data-reply-for="' + id + '"]');
+    if (panel) {
+      panel.classList.add('hidden');
+      if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
+});
 </script>
 {% endblock scripts %}
