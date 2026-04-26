@@ -1,14 +1,53 @@
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
-from movies.models import Movie, MovieReview, MovieComment, Person, MovieCredit, MovieLike
-from movies.forms import MovieReviewForm, MovieCommentForm
-from django.db.models import Q, Avg, Count
-from movies.models import Movie, Genre
+from collections import defaultdict
+
 from django.contrib.auth.decorators import login_required
-from movies.recommendation_engine import RecommendationEngine
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from django.db.models import Avg, Count, Q
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+
+from movies.forms import MovieCommentForm, MovieReviewForm
+from movies.models import Movie, MovieComment, MovieCredit, MovieLike, MovieReview, MovieReviewReaction, Person
+from movies.recommendation_engine import RecommendationEngine
+
+
+def _reviews_thread_context(movie, user):
+    """Nested review threads + current user's reaction per review (for UI)."""
+    reviews = list(
+        MovieReview.objects.filter(movie=movie)
+        .select_related("user", "user__profile")
+        .order_by("created_at", "id")
+    )
+    reaction_by_review = {}
+    if user.is_authenticated and reviews:
+        for row in MovieReviewReaction.objects.filter(user=user, review__in=[r.pk for r in reviews]):
+            reaction_by_review[row.review_id] = row.vote
+    for r in reviews:
+        r.user_reaction_vote = reaction_by_review.get(r.pk)
+    by_parent = defaultdict(list)
+    for r in reviews:
+        by_parent[r.parent_id].append(r)
+
+    def sort_key_root(r):
+        ts = r.created_at.timestamp() if r.created_at else 0.0
+        return (-ts, -r.pk)
+
+    def sort_key_child(r):
+        ts = r.created_at.timestamp() if r.created_at else 0.0
+        return (ts, r.pk)
+
+    def build_nodes(parent_id):
+        rows = by_parent.get(parent_id, [])
+        if parent_id is None:
+            rows = sorted(rows, key=sort_key_root)
+        else:
+            rows = sorted(rows, key=sort_key_child)
+        return [{"review": r, "children": build_nodes(r.pk)} for r in rows]
+
+    return {
+        "review_tree": build_nodes(None),
+    }
+
 
 def all_movies(request):
     movies= Movie.objects.all()
@@ -57,7 +96,10 @@ def index(request):
 def movie(request, movie_id):
     movie = Movie.objects.get(id=movie_id)
     review_form = MovieReviewForm()
-    review_stats = movie.moviereview_set.aggregate(avg_rating=Avg('rating'), total_reviews=Count('id'))
+    review_stats = movie.moviereview_set.filter(parent__isnull=True).aggregate(
+        avg_rating=Avg("rating"),
+        total_reviews=Count("id"),
+    )
     recommender = RecommendationEngine(movie=movie, user=request.user, limit=6)
     recommendations = recommender.get_recommendations()
     user_liked = (
@@ -75,11 +117,14 @@ def movie(request, movie_id):
         'user_liked': user_liked,
         'like_count': like_count,
     }
+    context.update(_reviews_thread_context(movie, request.user))
     return render(request,'movies/movie.html', context=context )
 
 def movie_reviews(request, movie_id):
-    movie = Movie.objects.get(id=movie_id)
-    return render(request,'movies/reviews.html', context={'movie':movie } )
+    movie = get_object_or_404(Movie, id=movie_id)
+    ctx = {"movie": movie}
+    ctx.update(_reviews_thread_context(movie, request.user))
+    return render(request, "movies/reviews.html", context=ctx)
 
 def add_comment(request, movie_id):
     form = None
@@ -143,6 +188,56 @@ def actor_detail(request, actor_id):
         'movies': movies,
     }
     return render(request, 'movies/actor.html', context=context)
+
+@login_required(login_url='/users/login')
+@require_POST
+def add_review_reply(request, movie_id, parent_id):
+    parent = get_object_or_404(MovieReview, id=parent_id, movie_id=movie_id)
+    text = (request.POST.get("reply_text") or "").strip()
+    if len(text) < 5:
+        return redirect("movie_detail", movie_id=movie_id)
+    reply = MovieReview(
+        user=request.user,
+        movie_id=movie_id,
+        parent=parent,
+        review=text,
+        title=None,
+        rating=None,
+    )
+    reply.full_clean()
+    reply.save()
+    return redirect("movie_detail", movie_id=movie_id)
+
+
+@login_required(login_url='/users/login')
+@require_POST
+def review_reaction(request, review_id):
+    review = get_object_or_404(MovieReview, id=review_id)
+    action = (request.POST.get("action") or "").lower()
+    if action not in ("like", "dislike"):
+        return JsonResponse({"error": "invalid action"}, status=400)
+    desired = MovieReviewReaction.VOTE_LIKE if action == "like" else MovieReviewReaction.VOTE_DISLIKE
+    existing = MovieReviewReaction.objects.filter(user=request.user, review=review).first()
+    if existing:
+        if existing.vote == desired:
+            existing.delete()
+        else:
+            existing.vote = desired
+            existing.save()
+    else:
+        MovieReviewReaction.objects.create(user=request.user, review=review, vote=desired)
+    review.sync_reaction_counts()
+    review.refresh_from_db(fields=["like_count", "dislike_count"])
+    row = MovieReviewReaction.objects.filter(user=request.user, review=review).first()
+    my_vote = row.vote if row else None
+    return JsonResponse(
+        {
+            "like_count": review.like_count,
+            "dislike_count": review.dislike_count,
+            "my_vote": my_vote,
+        }
+    )
+
 
 @login_required(login_url='/users/login')
 @require_POST
