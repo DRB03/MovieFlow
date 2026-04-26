@@ -92,6 +92,14 @@
         <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Liked</span>
         <span class="text-sm font-bold text-red-500">{{ liked_movies.count }}</span>
       </div>
+      <div class="inline-flex items-center gap-2 rounded border border-gray-200 dark:border-bordercol bg-gray-50 dark:bg-[#0f1215] px-3 py-1.5">
+        <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Followers</span>
+        <span class="text-sm font-bold text-[#40bcf4] tabular-nums">{{ followers_count }}</span>
+      </div>
+      <div class="inline-flex items-center gap-2 rounded border border-gray-200 dark:border-bordercol bg-gray-50 dark:bg-[#0f1215] px-3 py-1.5">
+        <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Following</span>
+        <span class="text-sm font-bold text-gray-900 dark:text-textcol tabular-nums">{{ following_count }}</span>
+      </div>
       <a href="{% url 'logout' %}"
          class="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-bordercol dark:text-gray-200 dark:hover:bg-surface transition-colors ml-auto">
         Log out
