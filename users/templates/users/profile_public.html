@@ -35,12 +35,12 @@
           class="w-20 h-20 rounded-full object-cover border border-gray-200 dark:border-bordercol shrink-0"
         />
         <div class="min-w-0">
-          <p class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-muted">Perfil público</p>
+          <p class="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-muted">Public Profile</p>
           <h1 class="mt-2 text-2xl font-bold text-gray-900 dark:text-textcol truncate">
             {{ profile_user.username }}
           </h1>
           <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
-            Miembro desde {{ profile_user.date_joined|date:"M Y" }}
+            Member since {{ profile_user.date_joined|date:"M Y" }}
           </p>
         </div>
       </div>
@@ -52,7 +52,7 @@
               href="{% url 'profile' %}"
               class="inline-flex justify-center items-center rounded-md border border-[#40bcf4] px-4 py-2 text-sm font-mono uppercase tracking-widest text-[#40bcf4] hover:bg-[#40bcf4]/10 transition-colors"
             >
-              Editar mi perfil
+              Edit profile
             </a>
           {% else %}
             <form method="post" action="{% url 'toggle_follow' profile_user.username %}">
@@ -62,14 +62,14 @@
                   type="submit"
                   class="w-full sm:w-auto inline-flex justify-center items-center rounded-md border border-gray-300 dark:border-bordercol px-4 py-2 text-sm font-mono uppercase tracking-widest text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-surface transition-colors"
                 >
-                  Dejar de seguir
+                  Unfollow
                 </button>
               {% else %}
                 <button
                   type="submit"
                   class="w-full sm:w-auto inline-flex justify-center items-center rounded-md border border-green-600 dark:border-accent bg-green-600/10 dark:bg-accent/10 px-4 py-2 text-sm font-mono uppercase tracking-widest text-green-700 dark:text-accent hover:bg-green-600/20 dark:hover:bg-accent/20 transition-colors"
                 >
-                  Seguir
+                  Follow
                 </button>
               {% endif %}
             </form>
@@ -79,7 +79,7 @@
             href="{% url 'login' %}?next={{ request.path|urlencode }}"
             class="inline-flex justify-center items-center rounded-md border border-gray-300 dark:border-bordercol px-4 py-2 text-sm font-mono uppercase tracking-widest text-gray-700 dark:text-gray-200 hover:border-[#40bcf4] transition-colors"
           >
-            Inicia sesión para seguir
+            Login to continue...
           </a>
         {% endif %}
       </div>
@@ -87,22 +87,22 @@
 
     <div class="mt-6 flex flex-wrap gap-3">
       <div class="inline-flex items-center gap-2 rounded border border-gray-200 dark:border-bordercol bg-gray-50 dark:bg-[#0f1215] px-3 py-1.5">
-        <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Reseñas</span>
+        <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Reviews</span>
         <span class="text-sm font-bold text-[#40bcf4]">{{ review_count }}</span>
       </div>
       <div class="inline-flex items-center gap-2 rounded border border-gray-200 dark:border-bordercol bg-gray-50 dark:bg-[#0f1215] px-3 py-1.5">
-        <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Seguidores</span>
+        <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Followers</span>
         <span class="text-sm font-bold text-[#40bcf4] tabular-nums">{{ followers_count }}</span>
       </div>
       <div class="inline-flex items-center gap-2 rounded border border-gray-200 dark:border-bordercol bg-gray-50 dark:bg-[#0f1215] px-3 py-1.5">
-        <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Siguiendo</span>
+        <span class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Following</span>
         <span class="text-sm font-bold text-gray-900 dark:text-textcol tabular-nums">{{ following_count }}</span>
       </div>
     </div>
   </header>
 
   <section>
-    <p class="section-label">Reseñas públicas</p>
+    <p class="section-label">Public Reviews</p>
     {% if reviews %}
     <ul class="space-y-4">
       {% for review in reviews %}
@@ -118,7 +118,7 @@
       {% endfor %}
     </ul>
     {% else %}
-    <p class="text-sm text-gray-600 dark:text-gray-400 font-mono">Este usuario aún no ha publicado reseñas.</p>
+    <p class="text-sm text-gray-600 dark:text-gray-400 font-mono">This user has not published any reviews yet.</p>
     {% endif %}
   </section>
 </div>
