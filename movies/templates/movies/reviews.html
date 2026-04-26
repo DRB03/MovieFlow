@@ -1,54 +1,7 @@
-{% load static %}
-
-{% for review in movie.moviereview_set.all %} 
-
-<article class="flex max-w-xl flex-col items-start justify-between pt-4 pb-6 border-b border-gray-200 dark:border-slate-700">
-          <div class="flex items-center gap-x-4 text-xs">
-            <span class="relative z-10 rounded-full 
-            {% if review.rating < 6 %}
-            bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400
-            {% else %}
-            bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400
-            {% endif %}
-            px-3 py-1.5 
-            font-semibold text-base">{{review.rating}}</span>
-          </div>
-          <div class="group relative">
-            <h3 class="mt-2 text-lg/6 font-semibold text-gray-900 dark:text-gray-100 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
-              <a href="#">
-                <span class="absolute inset-0"></span>
-                {{review.title}}
-              </a>
-            </h3>
-            
-            <p class="mt-1 line-clamp-3 text-sm/6 text-gray-600 dark:text-gray-300">
-            {{review.review}}
-            </p>
-          
-          </div>
-          <div class="relative mt-4 flex items-center gap-x-4">
-            
-            {% if review.user.profile.avatar_url %}
-                <img src="{{ review.user.profile.avatar_url }}" alt="{{ review.user.username }}" class="size-12 rounded-full bg-gray-50 dark:bg-slate-800 object-cover z-10 relative">
-            {% else %}
-                <div class="size-12 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center font-bold text-gray-500 dark:text-gray-400 uppercase text-lg border border-gray-300 dark:border-slate-600 z-10 relative">
-                    {{ review.user.username|slice:":1" }}
-                </div>
-            {% endif %}
-            <div class="text-sm/6">
-              <p class="font-semibold text-gray-900 dark:text-gray-100">
-                <a href="#">
-                  <span class="absolute inset-0"></span>
-                  {{review.user}}
-                </a>
-              </p>
-              <p class="text-gray-600 dark:text-gray-400">Member since: {{review.user.date_joined|date:"M Y"}}</p>
-            </div>
-          </div>
-</article> 
-
-{% empty %}
-
-   <p class="text-gray-600 dark:text-gray-400">No reviews yet</p>
-
-{% endfor %}
+<div id="movie-reviews-root" class="space-y-4 max-w-3xl">
+  {% for node in review_tree %}
+    {% include "movies/review_thread_node.html" with node=node depth=0 %}
+  {% empty %}
+    <p class="text-gray-600 dark:text-gray-400 font-mono text-sm">No reviews yet</p>
+  {% endfor %}
+</div>
