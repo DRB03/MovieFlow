@@ -1,0 +1,132 @@
+{% load user_extras %}
+{% with r=node.review %}
+<article
+  id="review-{{ r.id }}"
+  class="{% if depth > 0 %}pt-0.5{% else %}border-b border-gray-200 dark:border-slate-700 pb-6{% endif %}"
+>
+
+  <div class="flex gap-3">
+
+    {# Avatar columna izquierda — con rail vertical si tiene hijos #}
+    <div class="flex flex-col items-center flex-shrink-0">
+      <img
+        src="{% user_avatar_url r.user %}"
+        alt=""
+        class="{% if depth == 0 %}size-8{% else %}size-7{% endif %} rounded-full object-cover mt-0.5 flex-shrink-0"
+      />
+      {% if node.children %}
+      <div class="w-px flex-1 mt-2 bg-sky-400/35 dark:bg-slate-600"></div>
+      {% endif %}
+    </div>
+
+    {# Columna derecha: todo el contenido #}
+    <div class="flex flex-col gap-1.5 min-w-0 flex-1">
+
+      {# 1. Usuario + fecha #}
+      <div class="flex items-baseline gap-2">
+        <a href="{% url 'user_public_profile' r.user.username %}" class="text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-sky-500 transition-colors">{{ r.user.username }}</a>
+        <span class="font-mono text-[0.62rem] text-gray-500 dark:text-gray-400">{{ r.created_at|date:"M j, Y" }}</span>
+      </div>
+
+      {# 2. Rating + titulo (solo reviews raiz) #}
+      {% if not r.parent_id %}
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="font-mono text-[0.65rem] uppercase tracking-widest text-gray-500 dark:text-muted">Review rate</span>
+        <span class="inline-flex items-center rounded-full px-2.5 py-1 font-semibold text-sm tabular-nums {% if r.rating and r.rating < 6 %}bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400{% else %}bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400{% endif %}">
+          {% if r.rating %}{{ r.rating }}/10{% else %}--{% endif %}
+        </span>
+      </div>
+      <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ r.title }}</h3>
+      {% endif %}
+
+      {# 3. Texto del comentario #}
+      <p class="text-sm/6 text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ r.review }}</p>
+
+      {# 4. Acciones: like / dislike / reply #}
+      <div class="flex flex-wrap items-center gap-1.5 font-mono text-[0.65rem] uppercase tracking-wider mt-0.5">
+        {% if user.is_authenticated %}
+        <button
+          type="button"
+          class="review-react-btn inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors {% if r.user_reaction_vote == 1 %}border-green-500 bg-green-500/10 text-green-600 dark:text-green-400{% else %}border-gray-300 dark:border-bordercol text-gray-600 dark:text-gray-300 hover:border-green-500/60{% endif %}"
+          data-review-id="{{ r.id }}"
+          data-action="like"
+        >
+          <span aria-hidden="true">&#9650;</span>
+          <span class="rc-like">{{ r.like_count }}</span>
+        </button>
+        <button
+          type="button"
+          class="review-react-btn inline-flex items-center gap-1 rounded border px-2 py-1 transition-colors {% if r.user_reaction_vote == -1 %}border-red-500 bg-red-500/10 text-red-600 dark:text-red-400{% else %}border-gray-300 dark:border-bordercol text-gray-600 dark:text-gray-300 hover:border-red-500/60{% endif %}"
+          data-review-id="{{ r.id }}"
+          data-action="dislike"
+        >
+          <span aria-hidden="true">&#9660;</span>
+          <span class="rc-dislike">{{ r.dislike_count }}</span>
+        </button>
+        <button
+          type="button"
+          class="review-reply-toggle inline-flex items-center rounded border border-gray-300 dark:border-bordercol px-2.5 py-1 text-gray-700 dark:text-gray-200 hover:border-sky-500 hover:text-sky-500 dark:hover:text-sky-400 transition-colors"
+          data-reply-for="{{ r.id }}"
+          aria-expanded="false"
+          aria-controls="reply-panel-{{ r.id }}"
+        >
+          Reply
+        </button>
+        {% else %}
+        <span class="text-gray-500 dark:text-muted px-1">&#9650; {{ r.like_count }}</span>
+        <span class="text-gray-500 dark:text-muted px-1">&#9660; {{ r.dislike_count }}</span>
+        <a href="{% url 'login' %}?next={{ request.path|urlencode }}" class="underline hover:text-sky-500 text-gray-500 dark:text-muted normal-case">Sign in to reply</a>
+        {% endif %}
+      </div>
+
+      {# 5. Reply form (oculto por defecto) #}
+      {% if user.is_authenticated %}
+      <div id="reply-panel-{{ r.id }}" class="hidden mt-1 max-w-xl space-y-2">
+        <form method="post" action="{% url 'add_review_reply' movie.id r.id %}" class="space-y-2">
+          {% csrf_token %}
+          <label for="reply-{{ r.id }}" class="font-mono text-[0.62rem] uppercase tracking-widest text-gray-500 dark:text-muted">Your reply</label>
+          <textarea
+            id="reply-{{ r.id }}"
+            name="reply_text"
+            rows="3"
+            minlength="5"
+            required
+            placeholder="Write a reply (min. 5 characters)..."
+            class="block w-full rounded-md border border-gray-300 dark:border-bordercol bg-white dark:bg-[#151b27] px-3 py-2 text-sm text-gray-900 dark:text-textcol placeholder:text-gray-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500/40"
+          ></textarea>
+          <div class="flex items-center gap-2">
+            <button type="submit" class="inline-flex items-center rounded border border-sky-500/60 px-3 py-1.5 font-mono text-[0.65rem] uppercase tracking-wider text-sky-600 dark:text-sky-400 hover:bg-sky-500/10 transition-colors">
+              Post reply
+            </button>
+            <button type="button" class="review-reply-cancel text-gray-500 dark:text-muted font-mono text-[0.65rem] uppercase tracking-wider px-2 py-1.5 hover:text-gray-800 dark:hover:text-gray-200" data-reply-for="{{ r.id }}">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+    {# Replies anidadas #}
+  {% if node.children %}
+  <div class="mt-2 space-y-3">
+    {% for child in node.children %}
+    <div class="flex gap-0">
+      {# Este div ocupa el mismo ancho que el avatar del padre (size-8 = 2rem) #}
+      <div class="flex-shrink-0 w-8 flex justify-center">
+        <div class="w-px bg-sky-400/35 dark:bg-slate-600 {% if not forloop.last %}h-full{% else %}h-5{% endif %}"></div>
+      </div>
+      {# Conector horizontal L #}
+      <div class="flex-shrink-0 w-4 h-5 border-b border-sky-400/35 dark:border-slate-600 mt-0 self-start"></div>
+      <div class="flex-1 min-w-0">
+        {% include "movies/review_thread_node.html" with node=child depth=depth|add:1 %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</article>
+{% endwith %}

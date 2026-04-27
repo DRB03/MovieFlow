@@ -32,6 +32,34 @@ class Profile(models.Model):
 		return f"Profile<{self.user.username}>"
 
 
+class UserFollow(models.Model):
+	"""follower follows following (asymmetric social graph)."""
+
+	follower = models.ForeignKey(
+		settings.AUTH_USER_MODEL,
+		on_delete=models.CASCADE,
+		related_name="following_relations",
+	)
+	following = models.ForeignKey(
+		settings.AUTH_USER_MODEL,
+		on_delete=models.CASCADE,
+		related_name="follower_relations",
+	)
+	created_at = models.DateTimeField(auto_now_add=True)
+
+	class Meta:
+		constraints = [
+			models.UniqueConstraint(fields=["follower", "following"], name="unique_user_follow_pair"),
+		]
+		indexes = [
+			models.Index(fields=["follower"]),
+			models.Index(fields=["following"]),
+		]
+
+	def __str__(self):
+		return f"{self.follower_id} → {self.following_id}"
+
+
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_user_profile(sender, instance, created, **kwargs):
 	if created:

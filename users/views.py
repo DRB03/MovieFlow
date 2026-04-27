@@ -1,14 +1,14 @@
-
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect
-from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
-from movies.models import MovieReview, Movie
+
+from movies.models import Movie, MovieReview
 from .forms import ProfileAvatarForm
-from .models import Profile
+from .models import Profile, UserFollow
 
 @login_required(login_url='/users/login')
 def profile_view(request):
@@ -22,16 +22,24 @@ def profile_view(request):
     else:
         avatar_form = ProfileAvatarForm(instance=profile)
 
-    reviews = MovieReview.objects.filter(user=request.user).select_related('movie').order_by('-id')
+    reviews = (
+        MovieReview.objects.filter(user=request.user, parent__isnull=True)
+        .select_related("movie")
+        .order_by("-created_at", "-id")
+    )
     liked_movies = Movie.objects.filter(
         likes__user=request.user
     ).prefetch_related('genres').order_by('-likes__created_at')
+    followers_count = UserFollow.objects.filter(following=request.user).count()
+    following_count = UserFollow.objects.filter(follower=request.user).count()
     context = {
         'profile_user': request.user,
         'profile': profile,
         'avatar_form': avatar_form,
         'reviews': reviews,
         'liked_movies': liked_movies,
+        'followers_count': followers_count,
+        'following_count': following_count,
     }
     return render(request, 'users/profile.html', context)
 
@@ -102,9 +110,48 @@ def logout_view(request):
     return HttpResponseRedirect(reverse('index'))
 
 
+def public_profile(request, username):
+    profile_user = get_object_or_404(User, username__iexact=username)
+    profile, _ = Profile.objects.get_or_create(user=profile_user)
+    review_qs = MovieReview.objects.filter(user=profile_user, parent__isnull=True)
+    review_count = review_qs.count()
+    reviews = review_qs.select_related("movie").order_by("-created_at", "-id")[:50]
+    followers_count = UserFollow.objects.filter(following=profile_user).count()
+    following_count = UserFollow.objects.filter(follower=profile_user).count()
+    is_own = request.user.is_authenticated and request.user.pk == profile_user.pk
+    is_following = False
+    if request.user.is_authenticated and not is_own:
+        is_following = UserFollow.objects.filter(follower=request.user, following=profile_user).exists()
+    context = {
+        "profile_user": profile_user,
+        "profile": profile,
+        "reviews": reviews,
+        "review_count": review_count,
+        "followers_count": followers_count,
+        "following_count": following_count,
+        "is_own_profile": is_own,
+        "is_following": is_following,
+    }
+    return render(request, "users/profile_public.html", context)
+
+
+@login_required(login_url='/users/login')
+@require_POST
+def toggle_follow(request, username):
+    target = get_object_or_404(User, username__iexact=username)
+    if target.pk == request.user.pk:
+        return HttpResponseRedirect(reverse("user_public_profile", kwargs={"username": target.username}))
+    rel = UserFollow.objects.filter(follower=request.user, following=target).first()
+    if rel:
+        rel.delete()
+    else:
+        UserFollow.objects.create(follower=request.user, following=target)
+    return HttpResponseRedirect(reverse("user_public_profile", kwargs={"username": target.username}))
+
+
 @login_required(login_url='/users/login')
 @require_POST
 def delete_review(request, review_id):
-    review = get_object_or_404(MovieReview, id=review_id, user=request.user)
+    review = get_object_or_404(MovieReview, id=review_id, user=request.user, parent__isnull=True)
     review.delete()
     return HttpResponseRedirect(reverse('profile'))
